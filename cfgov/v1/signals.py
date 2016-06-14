@@ -6,7 +6,8 @@ from django.dispatch import Signal
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
-from wagtail.wagtailcore.signals import page_unpublished
+from wagtail.wagtailcore.signals import page_published, page_unpublished
+
 
 page_unshared = Signal(providing_args=['instance'])
 
@@ -52,6 +53,11 @@ def unshare_all_revisions(sender, **kwargs):
 def unpublish_all_revisions(sender, **kwargs):
     update_all_revisions(kwargs['instance'], 'live')
 
+def configure_page_revision_callback(sender, **kwargs):
+    from .wagtail_hooks import configure_page_revision, flush_akamai
+    configure_page_revision(page=kwargs['instance'], is_publishing=True)
+    flush_akamai(page=kwargs['instance'], is_publishing=True)
 
 page_unshared.connect(unshare_all_revisions)
 page_unpublished.connect(unpublish_all_revisions)
+page_published.connect(configure_page_revision_callback)
