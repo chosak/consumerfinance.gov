@@ -18,12 +18,14 @@ Given the `MAJOR.MINOR.PATCH` pattern, here is how we decide to increment:
 ### Added
 
 - Added nonresponsive header script for non-v1 sections of the site
+- Added `has_unshared_changes`
 
 ### Changed
 - Datetimes are now saved in UTC and rendered in Eastern timezone when displayed in templates.
 - Django timezone setting changed to America/New_York.
 - Updated home page stats and date.
 - Rebuilt Nemo Grunt tasks in Gulp and moved built files to static_built directory.
+- Make page statuses more descriptive
 
 ### Removed
 
@@ -32,6 +34,7 @@ Given the `MAJOR.MINOR.PATCH` pattern, here is how we decide to increment:
 - Fixed layout bug in Latest Updates on Home Page.
 - Fixed spacing of Home Hero content.
 - Fixed spacing issues in the pre-footer.
+- Fixed scheduled publishing
 
 
 ## 3.0.0-3.3.21-hotfix – 2016-06-10
