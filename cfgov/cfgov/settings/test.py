@@ -32,3 +32,11 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 }
 
 GOVDELIVERY_API = 'core.govdelivery.MockGovDelivery'
+
+STATICFILES_FINDERS += [
+    'core.testutils.mock_staticfiles.MockStaticfilesFinder',
+]
+
+MOCK_STATICFILES_PATTERNS = {
+    'icons/*.svg': 'placeholder.svg', 
+}
