@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     'jobmanager',
     'wellbeing',
     'search',
+    'capitalframework',
 )
 
 OPTIONAL_APPS = [
@@ -155,6 +156,7 @@ TEMPLATES = [
         'OPTIONS': {
             'environment': 'v1.environment',
             'extensions': [
+                'capitalframework.jinja2tags.filters',
                 'v1.jinja2tags.filters',
                 'wagtail.wagtailcore.jinja2tags.core',
                 'wagtail.wagtailadmin.jinja2tags.userbar',
