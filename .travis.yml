@@ -9,6 +9,7 @@ python:
   - "2.7"
 
 services:
+  - elasticsearch
   - postgresql
 
 addons:
@@ -33,11 +34,15 @@ cache:
     - cfgov/unprocessed/apps/analytics-gtm/node_modules
 
 install:
+  - wget ${ES_DOWNLOAD_URL}
+  - tar -xzf elasticsearch-${ES_VERSION}.tar.gz
+  - ./elasticsearch-${ES_VERSION}/bin/elasticsearch &
   - ./travis_install.sh
 
 branches:
   only:
     - master
+    - elasticsearch-tests
 
 before_script:
   - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
@@ -51,6 +56,7 @@ env:
     - DJANGO_STAGING_HOSTNAME=content.localhost
     - COVERALLS_PARALLEL=true
     - PGPORT=5433
+    - ES_VERSION=2.3.5 ES_DOWNLOAD_URL=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/${ES_VERSION}/elasticsearch-${ES_VERSION}.tar.gz
 
 jobs:
   fast_finish: true
