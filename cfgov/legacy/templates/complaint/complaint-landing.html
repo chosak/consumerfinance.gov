@@ -1,9 +1,16 @@
-{% extends 'complaint/base_responsive.html' %}
-{% load staticfiles %}
+{% extends "front/base_update.html" %}
 {% load humanize %}
-{% load feature_flags %}
+{% load staticfiles %}
 
 {% block title %}Consumer Complaint Database{% endblock %}
+
+{% block page_css %}
+    <link rel="stylesheet" href="{% static 'complaint/css/main.min.css' %}">
+{% endblock %}
+
+{% block page_viewport %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% endblock %}
 
 {% block content %}
 <div id="ccdb-landing">
@@ -67,7 +74,6 @@
           <div class="content-l_col content-l_col-2-3">
             <h2>How one complaint can help millions</h2>
             <div class="db-numbers callouts-small">
-              <!-- <p class="callout"><span class="numeric-callout company-responses">{{ timely_responses|intcomma }} </span> company responses to consumer complaints</p> -->
               <p class="callout"><span class="numeric-callout percent-timely"> {{ stats.percent_timely|floatformat|add:"%" }} </span> of complaints sent to companies get timely responses</p>
             </div>
             <p>By submitting a complaint, consumers can be heard by financial companies, get help with their own issues, and help others avoid similar ones. Every complaint provides insight into problems that people are experiencing,  helping us identify inappropriate practices and allowing us to stop them before they become major issues. The result: better outcomes for consumers, and a better financial marketplace for everyone.</p>
@@ -92,12 +98,12 @@
             </p>
             <ul class="list list__links">
               <li class="list_item">
-                <a class="list_link icon-link icon-link__download" href="http://files.consumerfinance.gov/f/documents/201704_cfpb_Summary_of_Product_and_Sub-product_Changes.pdf">
+                <a class="list_link icon-link icon-link__download" href="https://files.consumerfinance.gov/f/documents/201704_cfpb_Summary_of_Product_and_Sub-product_Changes.pdf">
                   <span class="icon-link_text">Learn more about complaint form changes to products and sub-products</span>
                 </a>
               </li>
               <li class="list_item">
-                <a class="list_link icon-link icon-link__download" href="http://files.consumerfinance.gov/f/documents/201704_cfpb_Consumer_Complaint_Form_Product_and_Issue_Options.pdf">
+                <a class="list_link icon-link icon-link__download" href="https://files.consumerfinance.gov/f/documents/201704_cfpb_Consumer_Complaint_Form_Product_and_Issue_Options.pdf">
                   <span class="icon-link_text">View full list of complaint form products, sub-products, issues, and sub-issues</span>
                 </a>
               </li>
@@ -110,7 +116,7 @@
           <h2>About the data</h2>
           <div class="content-l">
             <div class="content-l_col content-l_col-2-3">
-              <p>The Consumer Complaint Database is a collection of complaints on a range of consumer financial products and services, sent to companies for response. We don’t verify all the facts alleged in these complaints, but we take steps to confirm a commercial relationship between the consumer and the company. <span class="publication-criteria"><a class="list_link icon-link icon-link__download" href="http://files.consumerfinance.gov/f/201303_cfpb_Final-Policy-Statement-Disclosure-of-Consumer-Complaint-Data.pdf">
+              <p>The Consumer Complaint Database is a collection of complaints on a range of consumer financial products and services, sent to companies for response. We don’t verify all the facts alleged in these complaints, but we take steps to confirm a commercial relationship between the consumer and the company. <span class="publication-criteria"><a class="list_link icon-link icon-link__download" href="https://files.consumerfinance.gov/f/201303_cfpb_Final-Policy-Statement-Disclosure-of-Consumer-Complaint-Data.pdf">
                 <span class="icon-link_text">See publication criteria</span>
               </a></span></p>
               <p>Since we started accepting complaints in July 2011, we’ve helped consumers connect with financial companies to understand issues with their mortgages, fix errors on their credit reports, stop harassment from debt collectors, and get direct responses about problems with their credit cards, checking and savings accounts, student loans, and more. We analyze the data to identify trends and problems in the marketplace to help us do a better job supervising companies, enforcing federal consumer financial laws and writing rules and regulations. We publish reports on complaints and share information with state and federal agencies.</p>
@@ -203,6 +209,3 @@
   </div>
 </div>
 {% endblock %}
-
-{% block page_js %}{% endblock %}
-{% block app_js %}{% endblock %}
