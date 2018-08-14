@@ -30,7 +30,6 @@ class ComplaintLandingView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(ComplaintLandingView, self).get_context_data(**kwargs)
         res_json = get_narratives_json()
-        context['stats'] = get_stats(res_json)
         (context['data_down'],
          context['narratives_down']) = is_data_not_updated(res_json)
         context['technical_issues'] = flag_enabled('CCDB_TECHNICAL_ISSUES')
@@ -61,19 +60,6 @@ def get_narratives_json():
         print(e)
         res_json = {}
     return res_json
-
-
-def get_stats(res_json):
-    res_stat = {}
-    try:
-        res_stat = res_json['stats']
-    except KeyError as e:
-        print("get_stats:KeyError")
-        print("There is problem accessing with the given key, "
-              "which probably means the json has missing data")
-        print(e)
-
-    return res_stat
 
 
 def get_now():
