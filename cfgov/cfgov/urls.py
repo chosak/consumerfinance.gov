@@ -24,9 +24,7 @@ from ask_cfpb.views import (
 )
 from core.views import ExternalURLNoticeView
 from legacy.views import token_provider
-from legacy.views.complaint import (
-    ComplaintLandingView
-)
+from legacy.views.complaint import ComplaintLandingView
 from legacy.views.housing_counselor import (
     HousingCounselorPDFView, HousingCounselorView
 )

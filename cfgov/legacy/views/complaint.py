@@ -1,92 +1,92 @@
-import requests
-import json
-from datetime import datetime, date, timedelta
-from django.shortcuts import render
-from django.views.generic import View, TemplateView
+from datetime import datetime, timedelta
+
 from django.conf import settings
+from django.views.generic import TemplateView
 
-from flags.state import (
-    flag_state,
-    flag_enabled,
-    flag_disabled,
-)
+import requests
+from flags.state import flag_enabled
 
-DEMO_JSON = {"stats": {"percent_timely": 42.0, "last_updated": "2018-01-01", "last_updated_narratives": "2018-01-01"}}
 
 class ComplaintLandingView(TemplateView):
-    """
-    Main page view.
+    """Consumer Complaint Database landing page view.
 
-    To run as a standalone demo with local data, put your demo json
-    in the 'demo.json' file at the project root and use this standalone url:
-    'http://127.0.0.1:8000/complaintdatabase/demo/demo.json/'
-    You can use a different file name; just specify it in the last URL field.
-    """
+    This view renders the template for the CCDB landing page.
 
-    @property
-    def template_name(self):
-        return "complaint/complaint-landing.html"
+    That template includes a hardcoded value for percent of timely complaint
+    responses, which is currently 97%.
+
+    It also optionally pulls down a JSON file containing CCDB status, and uses
+    the contents of that file to display a warning banner if the data is out
+    of date, or if a feature flag has been set to indicate other problems.
+    """
+    template_name = 'complaint/complaint-landing.html'
 
     def get_context_data(self, **kwargs):
         context = super(ComplaintLandingView, self).get_context_data(**kwargs)
-        res_json = get_narratives_json()
-        (context['data_down'],
-         context['narratives_down']) = is_data_not_updated(res_json)
+
+        complaint_source = getattr(
+            settings,
+            'COMPLAINT_LANDING_STATS_SOURCE',
+            None
+        )
+
+        if complaint_source:
+            ccdb_status_json = self.get_ccdb_status_json(complaint_source)
+            context.update(self.is_ccdb_out_of_date(ccdb_status_json))
+
         context['technical_issues'] = flag_enabled('CCDB_TECHNICAL_ISSUES')
+
         return context
 
+    def get_ccdb_status_json(self, complaint_source):
+        """Retrieve JSON describing the CCDB's status from a given URL."""
+        try:
+            res_json = requests.get(complaint_source).json()
+        except requests.exceptions.RequestException as e:
+            print("get_narratives_json:requests.exceptions.RequestException")
+            print("There is a problem with getting data from the URL")
+            print(e)
+            res_json = {}
+        except ValueError as e:
+            print("get_narratives_json:ValueError")
+            print("The text from the response doesn't follow "
+                  "the correct format to be parse as json")
+            print(e)
+            res_json = {}
 
-def get_narratives_json():
-    """
-    Main handler to deliver sample narratives to the landing page.
-    """
+        return res_json
 
-    complaint_source = getattr(settings, 'COMPLAINT_LANDING_STATS_SOURCE', None)
+    def is_ccdb_out_of_date(self, res_json):
+        """Parse JSON describing CCDB status to determine if it is out of date.
 
-    if not complaint_source:
-        return DEMO_JSON
+        Returns a dict with two keys: data_down and narratives_down. Values
+        for both of these are booleans.
+        """
+        data_down = flag_enabled('CCDB_TECHNICAL_ISSUES')
+        narratives_down = False
+        # show notification starting fifth business day data has not been
+        # updated M-Th, data needs to have been updated 6 days ago; F-S,
+        # preceding Monday
+        now = datetime.now()
+        weekday = datetime.weekday(now)
+        delta = weekday if weekday > 3 else 6
+        four_business_days_ago = (now -
+                                  timedelta(delta)).strftime("%Y-%m-%d")
 
-    try:
-        res_json = requests.get(complaint_source).json()
-    except requests.exceptions.RequestException as e:
-        print("get_narratives_json:requests.exceptions.RequestException")
-        print("There is a problem with getting data from the URL")
-        print(e)
-        res_json = {}
-    except ValueError as e:
-        print("get_narratives_json:ValueError")
-        print("The text from the response doesn't follow "
-              "the correct format to be parse as json")
-        print(e)
-        res_json = {}
-    return res_json
+        try:
 
+            if res_json['stats']['last_updated'] < four_business_days_ago:
+                data_down = True
+            elif (res_json['stats']['last_updated_narratives'] <
+                    four_business_days_ago):
+                narratives_down = True
+        except KeyError as e:
+            print("is_data_not_updated:KeyError")
+            print("There is problem accessing with the given key, "
+                  "which probably means the json has missing data")
+            print(e)
 
-def get_now():
-    return datetime.now()
-
-
-def is_data_not_updated(res_json):
-    data_down = flag_enabled('CCDB_TECHNICAL_ISSUES')
-    narratives_down = False
-    # show notification starting fifth business day data has not been updated
-    # M-Th, data needs to have been updated 6 days ago; F-S, preceding Monday
-    weekday = datetime.weekday(get_now())
-    delta = weekday if weekday > 3 else 6
-    four_business_days_ago = (get_now() -
-                              timedelta(delta)).strftime("%Y-%m-%d")
-
-    try:
-
-        if res_json['stats']['last_updated'] < four_business_days_ago:
-            data_down = True
-        elif (res_json['stats']['last_updated_narratives'] <
-                four_business_days_ago):
-            narratives_down = True
-    except KeyError as e:
-        print("is_data_not_updated:KeyError")
-        print("There is problem accessing with the given key, "
-              "which probably means the json has missing data")
-        print(e)
-
-    return (data_down, narratives_down)
+        return {
+            'data_down': data_down,
+            'narratives_down': narratives_down,
+        }
