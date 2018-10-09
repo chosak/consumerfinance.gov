@@ -35,10 +35,6 @@ cache:
 install:
   - ./travis_install.sh
 
-branches:
-  only:
-    - master
-
 before_script:
   - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
 
