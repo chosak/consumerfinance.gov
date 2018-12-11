@@ -11,5 +11,7 @@ mkdocs-bootswatch==0.1.0
 pymdown-extensions==2.0
 singledispatch==3.4.0.3
 six==1.11.0
+Sphinx==1.8.2
+sphinx-rtd-theme==0.4.2
 tornado==4.1
 mkDOCter==1.0.5

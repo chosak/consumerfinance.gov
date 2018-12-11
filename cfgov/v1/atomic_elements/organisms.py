@@ -32,6 +32,10 @@ from v1.util import ref
 
 
 class Well(blocks.StructBlock):
+    """StreamField block that looks like a well.
+
+    Here's a more thorough description.
+    """
     content = blocks.RichTextBlock(required=False, label='Well')
 
     class Meta:
