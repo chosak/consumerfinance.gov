@@ -11,6 +11,7 @@ nav:
     - Branching and merging: branching-merging.md
     - Feature flags: feature-flags.md
     - Split testing: split-testing.md
+    - Wagtail components: wagtail-components.md
     - How we use Travis CI: travis.md
 - Back-end guidelines:
     - Wagtail and Django migrations: wagtail-migrations.md
@@ -29,7 +30,8 @@ nav:
     - HMDA data: hmda.md
 
 theme:
-  name: 'readthedocs'
+    name: readthedocs
+
 extra_css:
     - css/overrides.css
 
@@ -42,3 +44,6 @@ markdown_extensions:
     - tables
     - toc:
         permalink: "¶"
+
+plugins:
+    - mkdocs-jinja

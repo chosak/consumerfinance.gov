@@ -1,6 +1,7 @@
 backports-abc==0.5
 Click==7.0
 futures==3.2.0
+docs/plugins/mkdocs-jinja-plugin
 Jinja2==2.10
 livereload==2.6.0
 Markdown==2.6.11
