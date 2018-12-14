@@ -1,0 +1,8 @@
+setup.py
+mkdocs_wagtail/__init__.py
+mkdocs_wagtail/plugin.py
+mkdocs_wagtail_plugin.egg-info/PKG-INFO
+mkdocs_wagtail_plugin.egg-info/SOURCES.txt
+mkdocs_wagtail_plugin.egg-info/dependency_links.txt
+mkdocs_wagtail_plugin.egg-info/entry_points.txt
+mkdocs_wagtail_plugin.egg-info/top_level.txt

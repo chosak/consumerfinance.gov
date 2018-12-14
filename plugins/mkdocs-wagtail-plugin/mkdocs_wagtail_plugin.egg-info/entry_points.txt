@@ -1,0 +1,3 @@
+[mkdocs.plugins]
+mkdocs_wagtail = mkdocs_wagtail.plugin:Plugin
+

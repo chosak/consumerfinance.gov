@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Atomic structure and design - cfgov-refresh</title>
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+  <link href="../css/overrides.css" rel="stylesheet">
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Atomic structure and design";
+    var mkdocs_page_input_path = "atomic-structure.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> cfgov-refresh</a>
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+	<ul class="current">
+	  
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="..">Introduction</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../installation/">Installation</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../usage/">Usage</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Building and Deploying for cf.gov</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../new-projects/">New projects</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../branching-merging/">Branching and merging</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../feature-flags/">Feature flags</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../split-testing/">Split testing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../wagtail-components/">Wagtail components</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../travis/">How we use Travis CI</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Back-end guidelines</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../wagtail-migrations/">Wagtail and Django migrations</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../django-to-wagtail/">Wagtail Pages vs Django views</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../forms-in-wagtail/">Forms in Wagtail page context</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../testing-be/">Testing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../translation/">Translation</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../caching/">Caching</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">Front-end guidelines</span>
+    <ul class="subnav">
+                <li class=" current">
+                    
+    <a class="current" href="./">Atomic structure and design</a>
+    <ul class="subnav">
+            
+    <li class="toctree-l3"><a href="#notes-on-atomic-design">Notes on Atomic Design</a></li>
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#atoms">Atoms</a></li>
+        
+            <li><a class="toctree-l4" href="#molecules">Molecules</a></li>
+        
+            <li><a class="toctree-l4" href="#organisms">Organisms</a></li>
+        
+            <li><a class="toctree-l4" href="#templates">Templates</a></li>
+        
+            <li><a class="toctree-l4" href="#folder-structure">Folder structure</a></li>
+        
+            <li><a class="toctree-l4" href="#javascript-architecture">JavaScript architecture</a></li>
+        
+            <li><a class="toctree-l4" href="#component-build-pipeline">Component build pipeline</a></li>
+        
+        </ul>
+    
+
+    </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../testing-fe/">Testing</a>
+                </li>
+    </ul>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <a class="" href="../development-tips/">Development tips</a>
+	    </li>
+          
+            <li class="toctree-l1">
+		
+    <span class="caption-text">APIs</span>
+    <ul class="subnav">
+                <li class="">
+                    
+    <a class="" href="../ask-cfpb/">Ask CFPB</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../consumer-complaint-database/">Consumer complaints</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../hmda/">HMDA data</a>
+                </li>
+    </ul>
+	    </li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">cfgov-refresh</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Front-end guidelines &raquo;</li>
+        
+      
+    
+    <li>Atomic structure and design</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/cfpb/cfgov-refresh/edit/master/docs/atomic-structure.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="notes-on-atomic-design">Notes on Atomic Design<a class="headerlink" href="#notes-on-atomic-design" title="Permanent link">¶</a></h1>
+<p>Check out <a href="https://www.ebaytechblog.com/?p=3113">Don't Build Pages, Build Modules</a>.
+It encompasses exactly what we are trying to achieve by building components
+using atomic design.
+It's important to note that our front-end atomic architecture is still evolving.</p>
+<p>Our components are broken down into templates, organisms, molecules, and atoms.
+We opted not to use the page component, although it exists in atomic design.
+Our components are composed of HTML, CSS, and JS (JavaScript).
+If a component doesn’t have user interactions or require styling,
+then it won’t have an associated JS and/or CSS file.</p>
+<p>We compose our atomic components as follows:</p>
+<h3 id="atoms">Atoms<a class="headerlink" href="#atoms" title="Permanent link">¶</a></h3>
+<p>Prefixed with “a-” in CSS, JavaScript, and HTML files.</p>
+<h4 id="html">HTML<a class="headerlink" href="#html" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-html">&lt;div class=&quot;a-overlay u-hidden&quot;&gt;&lt;/div&gt;</code></pre>
+
+<h4 id="css">CSS<a class="headerlink" href="#css" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-css"> .a-overlay {
+    // Only show overlay at mobile/tablet size.
+    .respond-to-max( @bp-sm-max, {
+        height: 100%;
+        width: 100%;
+ …</code></pre>
+
+<h3 id="molecules">Molecules<a class="headerlink" href="#molecules" title="Permanent link">¶</a></h3>
+<p>Prefixed with “m-” in CSS, JavaScript, and HTML files.</p>
+<h4 id="html_1">HTML<a class="headerlink" href="#html_1" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-html">&lt;div class=&quot;m-notification
+            m-notification__visible
+            m-notification__error&quot;
+     data-js-hook=&quot;state_atomic_init&quot;&gt;
+    {{ svg_icon('error') }}
+    &lt;div class=&quot;m-notification_content&quot; role=&quot;alert&quot;&gt;
+        &lt;div class=&quot;h4 m-notification_message&quot;&gt;Page not found.&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+<h4 id="css_1">CSS<a class="headerlink" href="#css_1" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-css">.m-notification {
+    display: none;
+    position: relative;
+    padding: @notification-padding__px;
+    …</code></pre>
+
+<h4 id="javascript">JavaScript<a class="headerlink" href="#javascript" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-javascript">function Notification( element ) {
+   const BASE_CLASS = 'm-notification';
+
+   // Constants for the state of this Notification.
+   const SUCCESS = 'success';
+   const WARNING = 'warning';
+   const ERROR = 'error';
+
+   // Constants for the Notification modifiers.
+   const MODIFIER_VISIBLE = BASE_CLASS + '__visible';
+   const _dom = atomicHelpers.checkDom( element, BASE_CLASS );
+   const _contentDom = _dom.querySelector( '.' + BASE_CLASS + '_content' );
+   …</code></pre>
+
+<p>The notification molecule can be instantiated with the following code:</p>
+<pre class="highlight"><code class="language-javascript">const notification = new Notification( _dom );
+notification.init();</code></pre>
+
+<h3 id="organisms">Organisms<a class="headerlink" href="#organisms" title="Permanent link">¶</a></h3>
+<p>Prefixed with “o-” in CSS, JavaScript, and HTML.</p>
+<h4 id="html_2">HTML<a class="headerlink" href="#html_2" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-html">&lt;div class=&quot;o-expandable
+            o-expandable__borders
+            o-expandable__midtone
+            o-expandable__expanded&quot;
+     data-js-hook=&quot;state_atomic_init&quot;&gt;
+    &lt;button class=&quot;o-expandable_target&quot; aria-pressed=&quot;true&quot;&gt;
+        &lt;div class=&quot;o-expandable_header&quot;&gt;
+        …</code></pre>
+
+<p>JavaScript:</p>
+<pre class="highlight"><code class="language-javascript"> function Expandable( element ) {
+  const BASE_CLASS = 'o-expandable';
+
+  // Bitwise flags for the state of this Expandable.
+  const COLLAPSED = 0;
+  const COLLAPSING = 1;
+  const EXPANDING = 2;
+  const EXPANDED = 3;
+
+  // The Expandable element will directly be the Expandable
+  // when used in an ExpandableGroup, otherwise it can be the parent container.
+  const _dom = atomicHelpers.checkDom( element, BASE_CLASS );
+  const _target = _dom.querySelector( '.' + BASE_CLASS + '_target' );
+  const _content = _dom.querySelector( '.' + BASE_CLASS + '_content' );
+  …</code></pre>
+
+<p>The Expandable organism can be instantiated with the following code:</p>
+<pre class="highlight"><code class="language-javascript">const expandable = new Expandable( _dom.querySelector( '.o-expandable' ) );
+expandable.init( _expandable.EXPANDED );</code></pre>
+
+<p>or</p>
+<pre class="highlight"><code class="language-javascript">const atomicHelpers = require( '../../modules/util/atomic-helpers' );
+const Expandable = require( '../../organisms/Expandable' );
+atomicHelpers.instantiateAll( '.o-expandable', Expandable );</code></pre>
+
+<h3 id="templates">Templates<a class="headerlink" href="#templates" title="Permanent link">¶</a></h3>
+<p>Prefixed with “t-” in CSS, JavaScript, and HTML. <a href="https://github.com/cfpb/cfgov-refresh/tree/master/cfgov/jinja2/v1">View all available templates</a> that can be extended or reused to create pages.</p>
+<h4 id="css_2">CSS<a class="headerlink" href="#css_2" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code class="language-css">.t-careers {
+    &amp;_social .m-social-media {
+        float: right;
+    }
+    …</code></pre>
+
+<h3 id="folder-structure">Folder structure<a class="headerlink" href="#folder-structure" title="Permanent link">¶</a></h3>
+<p>Our atomic components are separated and named based on asset type. HTML, CSS, and JavaScript for each component are in separate directories.</p>
+<h4 id="current-structure">Current structure<a class="headerlink" href="#current-structure" title="Permanent link">¶</a></h4>
+<h4 id="html_3">HTML<a class="headerlink" href="#html_3" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code>cfgov-refresh/cfgov/jinja2/v1/_includes/atoms/
+cfgov-refresh/cfgov/jinja2/v1/_includes/molecules/
+cfgov-refresh/cfgov/jinja2/v1/_includes/organisms/</code></pre>
+
+<h4 id="css_3">CSS<a class="headerlink" href="#css_3" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code>cfgov-refresh/cfgov/unprocessed/css/atoms/
+cfgov-refresh/cfgov/unprocessed/css/molecules/
+cfgov-refresh/cfgov/unprocessed/css/organisms/</code></pre>
+
+<h4 id="javascript_1">JavaScript<a class="headerlink" href="#javascript_1" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code>cfgov-refresh/cfgov/unprocessed/js/atoms/
+cfgov-refresh/cfgov/unprocessed/js/molecules/
+cfgov-refresh/cfgov/unprocessed/js/organisms/</code></pre>
+
+<h4 id="test">Test<a class="headerlink" href="#test" title="Permanent link">¶</a></h4>
+<pre class="highlight"><code>cfgov-refresh/test/unit_tests/atoms/
+cfgov-refresh/test/unit_tests/molecules/
+cfgov-refresh/test/unit_tests/organisms/</code></pre>
+
+<h3 id="javascript-architecture">JavaScript architecture<a class="headerlink" href="#javascript-architecture" title="Permanent link">¶</a></h3>
+<p>JavaScript components are built to be rendered on the server and then enhanced via JavaScript on the client. The basic interface for the components is as follows:</p>
+<pre class="highlight"><code class="language-javascript">function AtomicComponent( domElement ) {
+    // Ensure the passed in Element is in the DOM.
+    // Query and store references to sub-elements.
+    // Instantiate child atomic components.
+    // Bind necessary events for referenced DOM elements.
+    // Perform other initialization related tasks.
+    this.init = function init(){}
+
+    // General teardown function
+    // We don't remove the element from the DOM so
+    // we need to unbind the events.
+    this.destroy = function destroy(){}
+}</code></pre>
+
+<p>We generally favor composition over inheritance.
+You can get more information by reading the following:</p>
+<h4 id="articles">Articles<a class="headerlink" href="#articles" title="Permanent link">¶</a></h4>
+<p><a href="https://medium.com/javascript-scene/a-simple-challenge-to-classical-inheritance-fans-e78c2cf5eead#.mtrvhcjiw">A Simple Challenge to Classical Inheritance Fans</a>
+<a href="https://www.youtube.com/watch?v=wfMtDGfHWpA">Composition over Inheritance (Youtube)</a></p>
+<h2 id="component-build-pipeline">Component build pipeline<a class="headerlink" href="#component-build-pipeline" title="Permanent link">¶</a></h2>
+<h4 id="gulp">Gulp<a class="headerlink" href="#gulp" title="Permanent link">¶</a></h4>
+<p>Gulp is used as a task automation tool. Tasks include compiling CSS, creating a standard webpack workflow for bundling scripts, minifying code, linting, image optimizing, running unit tests, and <a href="https://github.com/cfpb/cfgov-refresh/tree/master/gulp">more</a>.</p>
+<h4 id="webpack">Webpack<a class="headerlink" href="#webpack" title="Permanent link">¶</a></h4>
+<p>Wepback is used as a module bundler although it's capable of more.
+We create page, global, and atomic specific bundles.
+The configuration for the bundles is contained in config/webpack-config.js.
+An explanation for the usage of each bundle is contained in scripts.js.</p>
+<h4 id="routes">Routes<a class="headerlink" href="#routes" title="Permanent link">¶</a></h4>
+<p>Routes are used to serve JavaScript bundles to the browser based
+on the requested URL or Wagtail page Media property.
+This happens via code contained in <a href="https://github.com/cfpb/cfgov-refresh/blob/master/cfgov/jinja2/v1/_layouts/base.html#L236-L285">base.html</a>. This file serves as the base HTML template for serving up assets and content. <a href="https://github.com/cfpb/cfgov-refresh/blob/master/cfgov/jinja2/v1/_layouts/base.html">View base.html on Github</a>.</p>
+<h4 id="wagtail-page-media-property">Wagtail page media property<a class="headerlink" href="#wagtail-page-media-property" title="Permanent link">¶</a></h4>
+<p>Each atomic component has a media property that list the JavaScript files
+that should be rendered via base.html.
+When a page is requested via the browser, code contained in base.html will
+loop all atomic components for the requested page and render
+the appropriate atomic JavaScript bundles.</p>
+<p>Here is an example of the media property on a component from the <a href="https://github.com/cfpb/cfgov-refresh/blob/master/cfgov/v1/atomic_elements/organisms.py#L223-L224">Email signup organism</a>:</p>
+<pre class="highlight"><code>class Media:
+    js = ['email-signup.js']</code></pre>
+
+<p>This will load the <code>email-signup.js</code> script on any page that includes the Email Signup organism in its template.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../testing-fe/" class="btn btn-neutral float-right" title="Testing">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../caching/" class="btn btn-neutral" title="Caching"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+          <a href="https://github.com/cfpb/cfgov-refresh/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+      
+      
+        <span><a href="../caching/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../testing-fe/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+
+</body>
+</html>
