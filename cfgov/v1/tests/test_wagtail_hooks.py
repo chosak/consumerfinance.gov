@@ -3,7 +3,8 @@ from django.test import TestCase, override_settings
 
 from wagtail.tests.testapp.models import SimplePage
 from wagtail.tests.utils import WagtailTestUtils
-from wagtail.wagtailcore.models import Site
+from wagtail.wagtailcore.models import Page, Site
+from wagtail.wagtailcore.rich_text import expand_db_html
 
 import mock
 
@@ -247,3 +248,34 @@ class TestResourceTagsFilter(TestCase, WagtailTestUtils):
             response.context['object_list'][1].title,
             'Test resource Banana'
         )
+
+# Testing this logging behavior can be nicer upon adoption of Python 3.4+,
+# using assertLogs:
+#
+# https://docs.python.org/3/library/unittest.html#unittest.TestCase.assertLogs
+class TestWarnAboutBrokenRichTextLinksPageLinkHandler(TestCase):
+    def test_valid_page_doesnt_log_anything(self):
+        site = Site.objects.get(is_default_site=True)
+        page = Page.objects.in_site(site).filter(live=True).first()
+
+        with mock.patch('v1.wagtail_hooks.logger') as logger:
+            expand_db_html('<a id="{}" linktype="page">'.format(page.pk))
+            logger.warning.assert_not_called()
+
+    def test_page_with_no_url_logs_warning(self):
+        root_page = Page.objects.get(pk=1)
+        page = SimplePage(title='foo', slug='foo', content='foo')
+        root_page.add_child(instance=page)
+
+        with mock.patch('v1.wagtail_hooks.logger') as logger:
+            expand_db_html('<a id="{}" linktype="page">'.format(page.pk))
+            logger.warning.assert_called_once_with(
+                'None link to page with no URL, ID {}'.format(page.pk)
+            )
+
+    def test_nonexistent_page_logs_warning(self):
+        with mock.patch('v1.wagtail_hooks.logger') as logger:
+            expand_db_html('<a id="24601" linktype="page">')
+            logger.warning.assert_called_once_with(
+                'Empty link to nonexistent page, ID 24601'
+            )

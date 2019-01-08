@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.conf import settings
 from django.conf.urls import url
@@ -14,6 +15,7 @@ from wagtail.contrib.modeladmin.options import (
 )
 from wagtail.wagtailadmin.menu import MenuItem
 from wagtail.wagtailcore import hooks
+from wagtail.wagtailcore.rich_text import PageLinkHandler
 
 from v1.admin_views import manage_cdn
 from v1.models.menu_item import MenuItem as MegaMenuItem
@@ -252,3 +254,35 @@ modeladmin_register(SnippetModelAdminGroup)
 def hide_snippets_menu_item(request, menu_items):
     menu_items[:] = [item for item in menu_items
                      if item.url != reverse('wagtailsnippets:index')]
+
+
+class WarnAboutBrokenRichTextLinksPageLinkHandler(PageLinkHandler):
+    NO_LINK_REGEX = re.compile(r'^<a>$')
+    NONE_LINK_REGEX = re.compile(r'^<a .*href="None">$')
+
+    @classmethod
+    def expand_db_attributes(cls, attrs, for_editor):
+        link_html = PageLinkHandler.expand_db_attributes(attrs, for_editor)
+
+        page_id = attrs['id']
+        if cls.NO_LINK_REGEX.match(link_html):
+            message = 'Empty link to nonexistent page, ID {}'.format(page_id)
+        elif cls.NONE_LINK_REGEX.match(link_html):
+            message = 'None link to page with no URL, ID {}'.format(page_id)
+        else:
+            message = None
+
+        if message:
+            logger.warning(message)
+            # Or, to generate 500 errors when this happens:
+            # raise ValueError(message)
+
+        return link_html
+
+
+@hooks.register('register_rich_text_link_handler')
+def warn_about_broken_rich_text_links():
+    return (
+        'page',
+        WarnAboutBrokenRichTextLinksPageLinkHandler
+    )
