@@ -82,8 +82,13 @@ class FilterableListForm(forms.Form):
             'placeholder': 'Search for a specific word in item title',
         })
     )
-    from_date = FilterableDateField(field_id='filterable-list-controls-from-date')
-    to_date = FilterableDateField(field_id='filterable-list-controls-to-date')
+    from_date = FilterableDateField(
+        field_id='filterable-list-controls-from-date'
+    )
+
+    to_date = FilterableDateField(
+        field_id='filterable-list-controls-to-date'
+    )
 
     categories = forms.MultipleChoiceField(
         required=False,
