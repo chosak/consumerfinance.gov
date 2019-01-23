@@ -20,20 +20,6 @@ class MultipleChoiceFieldNoValidation(forms.MultipleChoiceField):
         pass
 
 
-class FilterableTitleField(forms.CharField):
-    default_widget_attrs = {
-        'id': 'title',
-        'class': 'a-text-input a-text-input__full',
-        'placeholder': 'Search for a specific word in item title',
-    }
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', widgets.TextInput(
-            attrs=self.default_widget_attrs
-        ))
-        super(FilterableTitleField, self).__init__(*args, **kwargs)
-
-
 class FilterableDateField(forms.DateField):
     def validate_after_1900(date):
         strftime_earliest_year = 1900
@@ -61,26 +47,16 @@ class FilterableDateField(forms.DateField):
         'data-type': 'date'
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, field_id, *args, **kwargs):
         kwargs.setdefault('required', False)
         kwargs.setdefault('input_formats', self.default_input_formats)
+        kwargs.setdefault('error_messages', ERROR_MESSAGES['DATE_ERRORS'])
+
+        self.default_widget_attrs['id'] = field_id
         kwargs.setdefault('widget', widgets.DateInput(
             attrs=self.default_widget_attrs
         ))
-        kwargs.setdefault('error_messages', ERROR_MESSAGES['DATE_ERRORS'])
         super(FilterableDateField, self).__init__(*args, **kwargs)
-
-
-class FilterableFromDateField(FilterableDateField):
-    def __init__(self, *args, **kwargs):
-        self.default_widget_attrs['id'] = 'from_date'
-        super(FilterableFromDateField, self).__init__(*args, **kwargs)
-
-
-class FilterableToDateField(FilterableDateField):
-    def __init__(self, *args, **kwargs):
-        self.default_widget_attrs['id'] = 'to_date'
-        super(FilterableToDateField, self).__init__(*args, **kwargs)
 
 
 class FilterableListForm(forms.Form):
@@ -97,9 +73,18 @@ class FilterableListForm(forms.Form):
         'id': 'authors'
     }
 
-    title = FilterableTitleField(max_length=250, required=False)
-    from_date = FilterableFromDateField()
-    to_date = FilterableToDateField()
+    title = forms.CharField(
+        max_length=250,
+        required=False,
+        widget=forms.TextInput(attrs={
+            'id': 'filterable-list-controls-title',
+            'class': 'a-text-input a-text-input__full',
+            'placeholder': 'Search for a specific word in item title',
+        })
+    )
+    from_date = FilterableDateField(field_id='filterable-list-controls-from-date')
+    to_date = FilterableDateField(field_id='filterable-list-controls-to-date')
+
     categories = forms.MultipleChoiceField(
         required=False,
         choices=ref.page_type_choices,
