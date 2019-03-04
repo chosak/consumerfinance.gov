@@ -191,7 +191,8 @@ class Notification(blocks.StructBlock):
     ], required=True, default='default')
     message = blocks.CharBlock(required=True,
                                label='Notification message')
-    explanation = blocks.RichTextBlock(required=False,
+    explanation = blocks.RichTextBlock(features=['link'],
+                                       required=False,
                                        label='Explanation text '
                                              'below the message')
 

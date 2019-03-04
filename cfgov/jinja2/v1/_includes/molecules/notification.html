@@ -49,25 +49,11 @@
 {% endmacro %}
 
 {% if value %}
-
-    {#
-      TODO: This if/else is for removing the explanation if it's empty HTML.
-            Investigate a better way to do this that doesn't repeat the call.
-    #}
-    {% if ( value.explanation | trim ) == '<div class="rich-text"><p><br/></p></div>' %}
-        {{ render(
-            value.type,
-            value.is_visible | default( true ),
-            value.message
-          )
-        }}
-    {% else %}
-        {{ render(
-            value.type,
-            value.is_visible | default( true ),
-            value.message,
-            value.explanation
-          )
-        }}
-    {% endif %}
+    {{ render(
+        value.type,
+        value.is_visible | default( true ),
+        value.message,
+        value.explanation if value.explanation | striptags else none
+      )
+    }}
 {% endif %}
