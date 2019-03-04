@@ -194,6 +194,7 @@ class Notification(blocks.StructBlock):
     explanation = blocks.RichTextBlock(required=False,
                                        label='Explanation text '
                                              'below the message')
+
     class Meta:
         icon = 'warning'
         template = '_includes/molecules/notification.html'
