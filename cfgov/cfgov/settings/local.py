@@ -8,6 +8,7 @@ from .base import *
 DEBUG = True
 SECRET_KEY = 'not-secret-key-for-testing'
 INSTALLED_APPS += (
+    'mod_wsgi.server',
     'sslserver',
     'wagtail.contrib.wagtailstyleguide',
 )
@@ -43,6 +44,12 @@ if os.environ.get('ENABLE_SQL_LOGGING'):
         'level': 'DEBUG',
         'propagate': False,
     }
+
+# WhiteNoise middleware needs to go before other middleware.
+MIDDLEWARE_CLASSES = (
+    ('whitenoise.middleware.WhiteNoiseMiddleware',) +
+    MIDDLEWARE_CLASSES
+)
 
 # Django Debug Toolbar
 if os.environ.get('ENABLE_DEBUG_TOOLBAR'):

@@ -79,7 +79,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.humanize',
 
-    'mod_wsgi.server',
     'storages',
     'data_research',
     'v1',
