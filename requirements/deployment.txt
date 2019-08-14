@@ -1,3 +1,5 @@
 -r base.txt
 -r postgres.txt
 newrelic==4.18.0.118
+
+git+https://github.com/chosak/python-loadenv.git

@@ -48,8 +48,10 @@ no-drama build "${build_args[@]}"
 # This is just a placeholder that gets replaced by Ansible.
 echo "{}" > ./dfd_env.json
 
-# Disable DFD override of staticfiles-related Django settings.
-echo '{"build_static_in": null, "static_in": null, "static_out": null}' > ./dfd_paths.json
+# Disable DFD override of Django staticfiles settings and its loading of
+# environment variables from an environment.json file. These are handled in
+# other places.
+echo '{"build_static_in": null, "environment": null, "static_in": null, "static_out": null}' > ./dfd_paths.json
 
 no-drama release \
     "./$build_artifact" \
