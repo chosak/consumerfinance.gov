@@ -73,7 +73,16 @@ def empty_200_response(request, *args, **kwargs):
     return HttpResponse(status=200)
 
 
+def dump_snippets(request):
+    from v1.models import Contact
+
+    return render(request, 'contacts.html', {
+        'contacts': Contact.objects.order_by('pk'),
+    })
+
+
 urlpatterns = [
+    url(r'^snippets/$', dump_snippets),
     url(r'^rural-or-underserved-tool/$',
         TemplateView.as_view(
             template_name='rural-or-underserved/index.html'),

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for contact in contacts %}
+<div style="margin: 50px;">
+<p>
+<a href="https://content.consumerfinance.gov/admin/v1/contact/edit/{{ contact.pk }}/">Edit "{{ contact }}" on content.cf.gov</a>
+</p>
+
+{% set value = {'contact': contact} %}
+{% include '_includes/organisms/sidebar-contact-info.html' %}
+</div>
+{% endfor %}
+</body>
+</html>
+{% endblock %}
