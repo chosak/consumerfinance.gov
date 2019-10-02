@@ -9,6 +9,7 @@ git:
   depth: 10
 
 services:
+  - docker
   - postgresql
 
 addons:
@@ -62,3 +63,19 @@ jobs:
         local_dir: site
         skip-cleanup: true
         github_token: $GITHUB_TOKEN
+    - stage: Generate deployable zipfile and push it to S3
+      script:
+        - ./docker/deployable-zipfile/build.sh
+        - mkdir ./s3
+        - mv ./cfgov_current_build.zip ./s3/cfgov_${TRAVIS_COMMIT}_build.zip
+      python: 3.6
+      deploy:
+        provider: s3
+        on:
+          all_branches: true
+        access_key_id: ${S3_DEPLOY_ACCESS_KEY_ID}
+        secret_access_key: ${S3_DEPLOY_SECRET_ACCESS_KEY}
+        bucket: ${S3_DEPLOY_BUCKET}
+        skip_cleanup: true
+        local_dir: s3
+        upload-dir: travis-builds
