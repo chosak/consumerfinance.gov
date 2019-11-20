@@ -11,7 +11,7 @@
 {% endblock carousel %}
 
 <section class="block">
-    {% with value = {'info_units': info_units, 'format': '33-33-33'} %}
+    {% with value = {'info_units': page.info_units|map(attribute='value')|list, 'format': '33-33-33'} %}
     {% include 'organisms/info-unit-group-2.html' %}
     {% endwith %}
 </section>

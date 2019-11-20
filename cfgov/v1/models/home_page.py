@@ -178,6 +178,8 @@ class HomePage(CFGOVPage):
         ('half_width_link_blob', molecules.HalfWidthLinkBlob()),
     ], blank=True)
 
+    info_units = StreamField([('info_unit', molecules.InfoUnit())], blank=True)
+
     # General content tab
     content_panels = CFGOVPage.content_panels + [
         StreamFieldPanel('header'),
@@ -197,6 +199,7 @@ class HomePage(CFGOVPage):
         ObjectList(content_panels, heading='General Content'),
         ObjectList(CFGOVPage.sidefoot_panels, heading='Sidebar'),
         ObjectList(CFGOVPage.settings_panels, heading='Configuration'),
+        ObjectList([StreamFieldPanel('info_units')], heading='New Design'),
     ])
 
     # Sets page to only be createable at the root
