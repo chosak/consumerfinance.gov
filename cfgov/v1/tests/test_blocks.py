@@ -1,13 +1,16 @@
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.test.client import RequestFactory
 from django.utils.safestring import SafeText
 
+from wagtail.wagtailcore import blocks
 from wagtail.wagtailcore.models import Page
 
 import mock
 
-from v1.blocks import AbstractFormBlock, AnchorLink, Link, PlaceholderCharBlock
+from v1.blocks import (
+    AbstractFormBlock, AnchorLink, Link, PlaceholderCharBlock, StreamBlock
+)
 
 
 class TestAbstractFormBlock(TestCase):
@@ -168,3 +171,178 @@ class TestLink(TestCase):
         value = block.to_python({'link_text': 'Link'})
         with self.assertRaises(ValidationError):
             block.clean(value)
+
+
+class ConfigurableTextBlock(blocks.StructBlock):
+    text = blocks.CharBlock()
+    has_top_border = blocks.BooleanBlock()
+    has_top_rule_line = blocks.BooleanBlock()
+    has_rule = blocks.BooleanBlock()
+    has_bottom_border = blocks.BooleanBlock()
+
+    def render(self, value, context=None):
+        return value['text']
+
+
+class SimpleStreamBlock(StreamBlock):
+    text = ConfigurableTextBlock()
+
+    def make_text_value(self, text_block_values):
+        return self.to_python(list(
+            {'type': 'text', 'value': value}
+            for value in text_block_values
+        ))
+
+
+class StreamBlockTests(SimpleTestCase):
+    def test_render_basic(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo'},
+            {'text': 'bar'},
+        ])
+
+        # Each block should render with class="block".
+        # The first block should get block__flush-top as well.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__flush-top">
+    foo
+</div>
+<div class="block">
+    bar
+</div>
+''')
+
+    def test_render_has_top_border(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_top_border': True},
+            {'text': 'bar', 'has_top_border': True},
+            {'text': 'baz'},
+        ])
+
+        # If the first block has has_top_border, don't add block__flush-top.
+        # Add block__padded-top and block__border-top wherever it is set.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__padded-top block__border-top">
+    foo
+</div>
+<div class="block block__padded-top block__border-top">
+    bar
+</div>
+<div class="block">
+    baz
+</div>
+''')
+
+    def test_render_has_top_rule_line(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_top_rule_line': True},
+            {'text': 'bar', 'has_top_rule_line': True},
+            {'text': 'baz'},
+        ])
+
+        # If the first block has has_top_rule_line, don't add block__flush-top.
+        # Add block__padded-top and block__border-top wherever it is set.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__padded-top block__border-top">
+    foo
+</div>
+<div class="block block__padded-top block__border-top">
+    bar
+</div>
+<div class="block">
+    baz
+</div>
+''')
+
+    def test_render_has_top_border_and_has_top_rule_line(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_top_border': True, 'has_top_rule_line': True},
+        ])
+
+        # If both has_top_border and has_top_rule_line are set, the classes
+        # block__padded-top and block__border-top should only be added once.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__padded-top block__border-top">
+    foo
+</div>
+''')
+
+    def test_render_has_rule(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_rule': True},
+            {'text': 'bar'},
+            {'text': 'baz', 'has_rule': True},
+        ])
+
+        # Add block__padded-bottom and block__border-bottom to any block
+        # that has has_rule set.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__flush-top block__padded-bottom block__border-bottom">
+    foo
+</div>
+<div class="block">
+    bar
+</div>
+<div class="block block__padded-bottom block__border-bottom">
+    baz
+</div>
+''')
+
+    def test_render_has_bottom_border(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_bottom_border': True},
+            {'text': 'bar'},
+            {'text': 'baz', 'has_bottom_border': True},
+        ])
+
+        # Add block__padded-bottom and block__border-bottom to any block
+        # that has has_bottom_border set.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__flush-top block__padded-bottom block__border-bottom">
+    foo
+</div>
+<div class="block">
+    bar
+</div>
+<div class="block block__padded-bottom block__border-bottom">
+    baz
+</div>
+''')
+
+    def test_render_has_rule_and_has_bottom_border(self):
+        block = SimpleStreamBlock()
+        value = block.make_text_value([
+            {'text': 'foo', 'has_rule': True, 'has_bottom_border': True},
+        ])
+
+        # If both has_rule and has_bottom_border are set, the classes
+        # block__padded-bottom and block__border-bottom should only be added
+        # once.
+        self.assertEqual(block.render(value), '''\
+<div class="block block__flush-top block__padded-bottom block__border-bottom">
+    foo
+</div>
+''')
+
+    def test_render_block_with_meta_classname(self):
+        class MyCharBlock(blocks.CharBlock):
+            class Meta:
+                classname = 'mine'
+
+        class TestStreamBlock(StreamBlock):
+            text = MyCharBlock()
+
+        block = TestStreamBlock()
+        value = block.to_python([{'type': 'text', 'value': 'foo'}])
+        self.assertEqual(block.render(value), '''\
+<div class="block block__flush-top mine">
+    foo
+</div>
+''')
+

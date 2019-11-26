@@ -301,3 +301,9 @@ class FeaturedMenuContent(blocks.StructBlock):
     link = Link(required=False, label="H4 link")
     body = blocks.RichTextBlock(required=False)
     image = atoms.ImageBasic(required=False)
+
+
+
+class StreamBlock(blocks.StreamBlock):
+    class Meta:
+        template = 'templates/streamblock.html'

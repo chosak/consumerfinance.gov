@@ -1,0 +1,35 @@
+{% for block in value -%}
+
+{% set block_classes = [ 'block' ] -%}
+
+{% set top_border = (
+    block.value.has_top_border or
+    block.value.has_top_rule_line
+) -%}
+
+{% if loop.first and not top_border -%}
+    {% do block_classes.append( 'block__flush-top' ) %}
+{%- endif -%}
+
+{% if top_border -%}
+    {% do block_classes.append( 'block__padded-top' ) -%}
+    {% do block_classes.append( 'block__border-top' ) %}
+{%- endif -%}
+
+{% set bottom_border = (
+    block.value.has_rule or
+    block.value.has_bottom_border
+) -%}
+
+{% if bottom_border -%}
+    {% do block_classes.append( 'block__padded-bottom' ) -%}
+    {% do block_classes.append( 'block__border-bottom' ) %}
+{%- endif -%}
+
+{% if block.block.meta.classname -%}
+    {% do block_classes.append( block.block.meta.classname ) %}
+{%- endif -%}
+<div class="{{ block_classes | join(' ') }}">
+    {% include_block block %}
+</div>
+{% endfor %}
