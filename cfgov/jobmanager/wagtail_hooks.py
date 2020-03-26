@@ -64,7 +64,7 @@ class JobRegionModelAdmin(ModelAdmin):
         return ", ".join(str(state) for state in self.states.all())
 
     def major_cities(self):
-        return "; ".join(str(city) for city in self.cities.all())
+        return "; ".join(str(city) for city in self.major_cities.all())
 
     list_display = ('abbreviation', 'name', states_in_region, major_cities)
 
@@ -73,7 +73,7 @@ class JobOfficeModelAdmin(ModelAdmin):
     model = Office
     menu_label = 'Offices'
     menu_icon = 'site'
-    list_display = ('abbreviation', 'name')
+    list_display = ('abbreviation', '__str__')
 
 
 class ServiceTypeModelAdmin(ModelAdmin):

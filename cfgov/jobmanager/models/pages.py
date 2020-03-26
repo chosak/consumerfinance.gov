@@ -1,15 +1,16 @@
+from django import forms
 from django.db import models
 from django.utils import timezone
 
 from wagtail.admin.edit_handlers import (
-    FieldPanel, FieldRowPanel, InlinePanel, MultiFieldPanel, ObjectList,
-    TabbedInterface
+    FieldPanel, FieldRowPanel, HelpPanel, InlinePanel, MultiFieldPanel,
+    ObjectList, TabbedInterface
 )
 from wagtail.core.fields import RichTextField
 from wagtail.core.models import PageManager, PageQuerySet
 
 from jobmanager.models.django import (
-    JobCategory, JobLength, JobLocation, ServiceType
+    JobCategory, JobLength, Office, Region, ServiceType
 )
 from v1.models import CFGOVPage
 from v1.models.snippets import ReusableText
@@ -61,15 +62,20 @@ class JobListingPage(CFGOVPage):
         null=True,
         blank=True
     )
-    location = models.ForeignKey(
-        JobLocation,
+    offices = models.ManyToManyField(
+        Office,
         related_name='job_listings',
-        on_delete=models.PROTECT
+        blank=True
     )
     allow_remote = models.BooleanField(
         default=False,
         help_text='Adds remote option to jobs with office locations.',
         verbose_name="Location can also be remote"
+    )
+    regions = models.ManyToManyField(
+        Region,
+        related_name='job_listings',
+        blank=True
     )
     responsibilities = RichTextField(
         'Responsibilities',
@@ -102,6 +108,12 @@ class JobListingPage(CFGOVPage):
         help_text='Optional: Add content for an additional section '
                   'that will display at end of job description.'
     )
+
+    LOCATION_HELP_TEXT = (
+        "Select <strong>either</strong> one or more offices "
+        "<strong>or</strong> one or more regions."
+    )
+
     content_panels = CFGOVPage.content_panels + [
         MultiFieldPanel([
             FieldPanel('division'),
@@ -120,8 +132,15 @@ class JobListingPage(CFGOVPage):
             ]),
         ], heading='Details'),
         MultiFieldPanel([
-            FieldPanel('location'),
-            FieldPanel('allow_remote'),
+            HelpPanel(
+                "Select <strong>either</strong> one or more offices "
+                "<strong>or</strong> one or more regions."
+            ),
+            FieldRowPanel([
+                FieldPanel('offices', widget=forms.CheckboxSelectMultiple),
+                FieldPanel('allow_remote'),
+            ]),
+            FieldPanel('regions', widget=forms.CheckboxSelectMultiple),
         ], heading='Location'),
         MultiFieldPanel([
             FieldPanel('description'),
@@ -178,3 +197,10 @@ class JobListingPage(CFGOVPage):
         """
         grades = set(g.grade.grade for g in self.grades.all())
         return sorted(grades, key=lambda g: '{0:0>8}'.format(g))
+
+    @property
+    def location_str(self):
+        if self.offices.count() + self.regions.count() > 1:
+            return "Multiple locations"
+
+        return str(self.offices.first() or self.regions.first())

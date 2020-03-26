@@ -48,7 +48,7 @@ class JobListingTable(JobListingsMixin, blocks.StaticBlock):
                 ),
                 ', '.join(map(str, job.grades.all())),
                 extended_strftime(job.close_date, '%_m %_d, %Y'),
-                str(job.location),
+                job.location_str,
             ] for job in jobs
         ]
 
@@ -64,7 +64,8 @@ class JobListingTable(JobListingsMixin, blocks.StaticBlock):
 
     def get_job_listings(self):
         return super().get_job_listings() \
-            .select_related('location') \
+            .prefetch_related('offices') \
+            .prefetch_related('regions') \
             .prefetch_related('grades__grade')
 
     class Meta:
