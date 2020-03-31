@@ -1,13 +1,17 @@
+from django.conf.urls import include, url
 from django.forms.models import ModelForm
 
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register
 )
 from wagtail.contrib.modeladmin.views import CreateView, EditView, InspectView
+from wagtail.core import hooks
 
+from jobmanager import template_debug
 from jobmanager.models import (
     ApplicantType, Grade, JobCategory, JobLength, Office, Region, ServiceType
 )
+from v1.views.template_debug import TemplateDebugView
 
 
 class ApplicantTypeModelAdmin(ModelAdmin):
@@ -101,3 +105,28 @@ class MyModelAdminGroup(ModelAdminGroup):
         JobOfficeModelAdmin,
         JobRegionModelAdmin
     )
+
+
+@hooks.register('register_admin_urls')
+def register_admin_urls():
+    urls = [
+        url(
+            rf'^template_debug/jobmanager/{template_name}/',
+            TemplateDebugView.as_view(
+                debug_template_name=f'jobmanager/{template_name}.html',
+                debug_test_cases=getattr(
+                    template_debug,
+                    f'{template_name}_test_cases'
+                )
+            ),
+            name=f'template_debug_{template_name}'
+        ) for template_name in (
+            'job_listing_details',
+            'job_listing_list',
+            'job_listing_table',
+        )
+    ]
+
+    return [
+        url('', include(urls, namespace='jobmanager')),
+    ]

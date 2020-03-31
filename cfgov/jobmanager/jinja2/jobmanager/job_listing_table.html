@@ -1,0 +1,60 @@
+{# ==========================================================================
+
+   Job Listings Table
+
+   ==========================================================================
+
+   Description:
+
+   Creates jobs table when given:
+
+   jobs:                    List of currently open jobs, where each job has:
+
+   job.title:               Title of open job.
+
+   job.url:                 Link to job listing page.
+
+   job.grades:              List of job grades, as strings.
+
+   job.close_date:          Date when open job closes.
+
+   job.offices:             List of offices, as strings.
+
+   job.regions:             List of regions, as strings.
+
+   no_jobs_message:         Message to show if no jobs exist.
+
+   ========================================================================== #}
+
+
+{%- import 'macros/time.html' as time %}
+
+{%- set columns = [ 'TITLE', 'GRADE', 'POSTING CLOSES', 'LOCATION' ] %}
+{%- set rows = [] %}
+
+{%- for job in jobs %}
+    {% if ( job.offices | length ) + ( job.regions | length ) > 1 %}
+        {% set location = 'Multiple locations' %}
+    {% elif job.regions %}
+        {% set location = job.regions[0] %}
+    {% elif job.offices %}
+        {% set location = job.offices[0] %}
+    {% endif %}
+
+    {% do rows.append( [
+        job.title,
+        job.grades | join( ', ' ),
+        time.render( job.close_date, { 'date' : true }, text_format=True ),
+        location | default ( '' )
+    ] ) %}
+{% endfor %}
+
+{%- with value = {
+    'data': [ columns ] + rows,
+    'has_data': not not rows,
+    'empty_table_msg': 'There are no current openings at this time.',
+    'first_row_is_table_header': true,
+    'is_stacked': true
+} %}
+    {% include '_includes/organisms/table.html' %}
+{% endwith %}

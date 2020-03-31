@@ -1,0 +1,111 @@
+{# ==========================================================================
+
+   Job Listing Details
+
+   ==========================================================================
+
+   Description:
+
+   Renders job details when given:
+
+   title:                   Job title.
+
+   division:                Job division.
+
+   close_date:              Date job closes.
+
+   offices:                 List of offices, as strings.
+
+   regions:                 List of regions, as dicts with:
+
+   region.name:             Name of region.
+
+   region.states:           List of states in region, as strings.
+
+   region.major_cities:     List of major cities in region, as strings.
+
+   grades:                  List of job grades, as integers.
+
+   salary_min:              Minimum salary, as float.
+
+   salary_max:              Maximum salary, as float.
+
+   applicant_types:         List of applicant types, as strings.
+
+   ========================================================================== #}
+
+{%- import 'macros/time.html' as time -%}
+{% import 'macros/util/format/datetime.html' as dt -%}
+
+<section class="block
+                block__flush-top
+                block__sub
+                vacancy-announcement_details">
+    <h1>{{ title }}</h1>
+    <dl class="job-details">
+        <dt>Division/Office:</dt>
+        <dd>{{ division }}</dd>
+        <dt>Closing date:</dt>
+        <dd>
+            {{- time.render( close_date, { 'date': true }, text_format=true ) }}
+        </dd>
+        {% if offices or regions %}
+        <dt>Location:</dt>
+        <dd>
+            {%- if regions %}
+                {%- set multiple_regions = regions | length > 1 -%}
+                Home duty location in one of the following
+                {%- if multiple_regions %}
+                    states:
+                    <ul class="u-mt10">
+                {% endif %}
+                {%- for region in regions %}
+                    {%- if multiple_regions %}<li>{% endif %}
+                    {{ region.name }} region
+                    {%- if not multiple_regions %} states{% endif %}:
+                    {{ region.states | join( ', ' ) }}
+                    <span class="u-hidden">
+                        Cities in this region include {{ region.major_cities | join( '; ' ) -}}.
+                    </span>
+                    {% if multiple_regions %}</li>{% endif %}
+                {% endfor %}
+                {% if regions | length > 1 %}</ul>{% endif %}
+            {% else %}
+                {% if offices | length == 2 and not remote_allowed %}
+                    {{ offices | join( ' or ' ) }}
+                {% else %}
+                    {% if offices | length == 1 %}
+                        {{- offices[ 0 ] }}
+                    {% else %}
+                        {{- offices[ :-1 ] | join( '; ' ) }}
+                        {{- '; ' if offices | length > 1 else '' }}
+                        {{- ' or ' if not remote_allowed else '' }}
+                        {{- offices[ -1 ] }}
+                        {{-  '; ' if remote_allowed else '' }}
+                    {% endif %}
+                    {{- ' or remote' if remote_allowed else '' }}
+                {% endif %}
+            {% endif %}
+        </dd>
+        {% endif %}
+        {% if grades %}
+        <dt>Grade{{ grades | pluralize() }}:</dt>
+        <dd>
+            {{ grades | sort | join( ', ' ) }}
+            <a class="pay-grade-link"
+                href="https://files.consumerfinance.gov/f/documents/cfpb_pay_scales.pdf">
+                See information on grades and base pay ranges</a>
+        </dd>
+        {% endif %}
+        <dt>Salary:</dt>
+        <dd>
+            ${{ '{:,.0f}'.format( salary_min ) -}}
+            &ndash;
+            {{- '{:,.0f}'.format( salary_max ) }}
+        </dd>
+        {% if applicant_types %}
+        <dt>Who may apply:</dt>
+        <dd>{{ applicant_types | join( ', ' ) }}</dd>
+        {% endif %}
+    </dl>
+</section>

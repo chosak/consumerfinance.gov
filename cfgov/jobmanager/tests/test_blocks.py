@@ -1,16 +1,18 @@
 from datetime import date
 
+from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from django.utils.encoding import force_text
 
 from wagtail.core.models import Page
+from wagtail.tests.utils import WagtailTestUtils
 
 from model_bakery import baker
 from scripts._atomic_helpers import job_listing_list
 
 from jobmanager.blocks import JobListingList, JobListingTable
-from jobmanager.models.django import Grade, JobCategory, JobLocation
+from jobmanager.models.django import Grade, JobCategory
 from jobmanager.models.pages import JobListingPage
 from jobmanager.models.panels import GradePanel
 from v1.models import SublandingPage
@@ -25,7 +27,6 @@ def make_job_listing_page(title, close_date=None, grades=[], **kwargs):
         close_date=close_date or timezone.now().date(),
         description='description',
         division=baker.make(JobCategory),
-        location=baker.make(JobLocation, name='Silicon Valley'),
         **kwargs
     )
 
@@ -177,3 +178,21 @@ class JobListingTableTestCase(TestCase):
         qs = JobListingTable().get_job_listings()
         self.assertTrue(qs.exists())
         self.assertEqual(job.title, qs[0].title)
+
+
+class TemplateDebugViewTests(TestCase, WagtailTestUtils):
+    def check(self, template_name):
+        self.login()
+
+        url = reverse(f'jobmanager:template_debug_{template_name}')
+        response = self.client.get(url)
+        self.assertContains(response, f'jobmanager/{template_name}.html')
+
+    def test_job_listing_details_view(self):
+        self.check('job_listing_details')
+
+    def test_job_listing_list_view(self):
+        self.check('job_listing_list')
+
+    def test_job_listing_table_view(self):
+        self.check('job_listing_table')
