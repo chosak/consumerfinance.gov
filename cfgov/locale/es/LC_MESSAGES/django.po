@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-17 10:20-0400\n"
+"POT-Creation-Date: 2020-08-25 21:33-0400\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -49,11 +49,11 @@ msgstr "Ver todos los resultados para"
 msgid "Export Ask data"
 msgstr ""
 
-#: cfgov/settings/base.py:248
+#: cfgov/settings/base.py:242
 msgid "English"
 msgstr ""
 
-#: cfgov/settings/base.py:249
+#: cfgov/settings/base.py:243
 msgid "Spanish"
 msgstr ""
 
@@ -105,47 +105,50 @@ msgstr ""
 msgid "Submit a Complaint"
 msgstr "Enviar una queja"
 
-#: jinja2/v1/_includes/molecules/global-search.html:23
-#: jinja2/v1/_includes/molecules/global-search.html:58
-#: jinja2/v1/_includes/molecules/global-search.html:77
+#: jinja2/v1/_includes/molecules/global-search.html:21
+#: jinja2/v1/_includes/molecules/global-search.html:22
+#: jinja2/v1/_includes/molecules/global-search.html:26
+#: jinja2/v1/_includes/molecules/global-search.html:61
+#: jinja2/v1/_includes/molecules/global-search.html:80
 #: jinja2/v1/_includes/organisms/ask-search.html:62
 #: jinja2/v1/ask-cfpb/see-all.html:52
 msgid "Search"
-msgstr "Buscar"
+msgstr "Buscar!"
 
-#: jinja2/v1/_includes/molecules/global-search.html:27
+#: jinja2/v1/_includes/molecules/global-search.html:23
+#: jinja2/v1/_includes/molecules/global-search.html:30
 msgid "Close"
 msgstr "Cerrar"
 
-#: jinja2/v1/_includes/molecules/global-search.html:63
 #: jinja2/v1/_includes/molecules/global-search.html:66
+#: jinja2/v1/_includes/molecules/global-search.html:69
 msgid "Search the CFPB"
 msgstr "Buscar la CFPB"
 
-#: jinja2/v1/_includes/molecules/global-search.html:72
+#: jinja2/v1/_includes/molecules/global-search.html:75
 #: jinja2/v1/ask-cfpb/see-all.html:56
-msgid "Clear search"
-msgstr "Borrar búsqueda"
+#msgid "Clear search"
+#msgstr "Borrar búsqueda"
 
-#: jinja2/v1/_includes/molecules/global-search.html:82
+#: jinja2/v1/_includes/molecules/global-search.html:85
 msgid "Suggested search terms:"
 msgstr ""
 
-#: jinja2/v1/_includes/molecules/global-search.html:86
+#: jinja2/v1/_includes/molecules/global-search.html:89
 #, fuzzy
 #| msgid "Related questions"
 msgid "Regulations"
 msgstr "Otras preguntas"
 
-#: jinja2/v1/_includes/molecules/global-search.html:91
+#: jinja2/v1/_includes/molecules/global-search.html:94
 msgid "Compliance guides"
 msgstr ""
 
-#: jinja2/v1/_includes/molecules/global-search.html:96
+#: jinja2/v1/_includes/molecules/global-search.html:99
 msgid "Mortgage"
 msgstr "Hipoteca"
 
-#: jinja2/v1/_includes/molecules/global-search.html:101
+#: jinja2/v1/_includes/molecules/global-search.html:104
 #, fuzzy
 #| msgid "Auto loans"
 msgid "College loans"

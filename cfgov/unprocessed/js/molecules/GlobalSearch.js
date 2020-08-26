@@ -141,7 +141,10 @@ function GlobalSearch( element ) { // eslint-disable-line max-statements, no-inl
 
     _searchInputDom.select();
 
-    _triggerDom.setAttribute( 'aria-label', 'Close' );
+    _triggerDom.setAttribute(
+      'aria-label',
+      _triggerDom.getAttribute( 'data-aria-label-close' )
+    );
 
     document.body.addEventListener( 'mousedown', _handleBodyClick );
   }
@@ -151,7 +154,10 @@ function GlobalSearch( element ) { // eslint-disable-line max-statements, no-inl
    * Use this to perform post-collapseBegin actions.
    */
   function _handleCollapseBegin() {
-    _triggerDom.setAttribute( 'aria-label', 'Search' );
+    _triggerDom.setAttribute(
+      'aria-label',
+      _triggerDom.getAttribute( 'data-aria-label-search' )
+    );
     document.body.removeEventListener( 'mousedown', _handleBodyClick );
   }
 
