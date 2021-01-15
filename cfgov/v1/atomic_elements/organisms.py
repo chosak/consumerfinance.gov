@@ -24,6 +24,7 @@ from jinja2 import Markup
 from taggit.models import Tag
 from wagtailmedia.blocks import AbstractMediaChooserBlock
 
+from .util import design_system_link
 from v1 import blocks as v1_blocks
 from v1.atomic_elements import atoms, molecules
 from v1.util import ref
@@ -1067,7 +1068,7 @@ class FeaturedContent(blocks.StructBlock):
     class Meta:
         template = '_includes/organisms/featured-content.html'
         icon = 'doc-full-inverse'
-        label = 'Featured Content'
+        label = design_system_link('Featured Content', 'patterns/featured-content-module')
         classname = 'block__flush'
         value_class = FeaturedContentStructValue
 
