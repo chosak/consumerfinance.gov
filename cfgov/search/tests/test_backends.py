@@ -113,7 +113,7 @@ class PageSearchBackendTests(TestCase):
         self.assertEqual(results.count(), 1)
 
     def test_search_filtered_by_related_field(self):
-        tagged_pages = LearnPage.objects.filter(tags__name='test')
+        tagged_pages = LearnPage.objects.filter(live=True, tags__name='test')
         self.assertEqual(tagged_pages.count(), 1)
 
         results = tagged_pages.search('My body', backend=self.backend_name)
