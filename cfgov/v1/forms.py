@@ -324,16 +324,6 @@ class FilterableListForm(forms.Form):
 
         return cleaned_data
 
-    # Sets the html name by replacing the render method to use the given name.
-    def set_field_html_name(self, field, new_name):
-        """
-        This creates wrapper around the normal widget rendering,
-        allowing for a custom field name (new_name).
-        """
-        old_render = field.widget.render
-        field.widget.render = lambda name, value, **kwargs: \
-            old_render(new_name, value, **kwargs)
-
     def clean_archived(self):
         data = self.cleaned_data['archived']
         if data == 'exclude':
