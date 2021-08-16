@@ -3,11 +3,13 @@ from django.template.response import TemplateResponse
 
 from wagtail.contrib.routable_page.models import RoutablePageMixin, route
 
+from dateutil import parser
 from flags.state import flag_enabled
 
 from v1.documents import FilterablePagesDocumentSearch
 from v1.feeds import FilterableFeed
 from v1.models.learn_page import AbstractFilterPage
+from v1.search import FilterablePagesSearch
 from v1.util.ref import get_category_children
 from v1.util.util import get_secondary_nav_items
 
@@ -69,37 +71,38 @@ class FilterableListMixin(RoutablePageMixin):
         return self.url
 
     def get_context(self, request, *args, **kwargs):
-        context = super().get_context(
-            request, *args, **kwargs
-        )
+        context = super().get_context(request, *args, **kwargs)
 
-        form_data, has_active_filters = self.get_form_data(request.GET)
-        filterable_search = self.get_filterable_search()
-        has_unfiltered_results = filterable_search.count() > 0
-        form = self.get_form_class()(
-            form_data,
-            wagtail_block=self.get_filterable_list_wagtail_block(),
-            filterable_categories=self.filterable_categories,
-            filterable_search=filterable_search,
-            cache_key_prefix=self.get_cache_key_prefix(),
-        )
-        filter_data = self.process_form(request, form)
+        search = FilterablePagesSearch()
+        stats = search.get_stats()
 
-        # flag check to enable or disable archive filter options
-        if flag_enabled('HIDE_ARCHIVE_FILTER_OPTIONS', request=request):
-            has_archived_posts = False
-        else:
-            has_archived_posts = any(
-                result for result in form.all_filterable_results
-                if result.is_archived == 'yes'
-            )
+        form_cls = self.get_form_class()
+
+        total_results = stats.hits.total.value
+        form = form_cls(
+            language_choices=stats.language_choices,
+            topic_choices=stats.topic_choices,
+            min_start_date=stats.min_start_date,
+            max_start_date=stats.max_end_date,
+            data=request.GET
+        )
+        
+        wagtail_block=self.get_filterable_list_wagtail_block(),
+        filterable_categories=self.filterable_categories,
+            
+        # filter_data = ???
+        results = search.search(
+            form.cleaned_data['languages'],
+            form.cleaned_data['topics'],
+            form.cleaned_data['to_date'],
+        )
 
         context.update({
             'filter_data': filter_data,
             'get_secondary_nav_items': get_secondary_nav_items,
-            'has_active_filters': has_active_filters,
-            'has_archived_posts': has_archived_posts,
-            'has_unfiltered_results': has_unfiltered_results,
+            'has_active_filters': form.has_changed(),
+            'has_archived_posts': bool(stats.archived_count),
+            'has_unfiltered_results': bool(stats.total_count),
         })
 
         return context

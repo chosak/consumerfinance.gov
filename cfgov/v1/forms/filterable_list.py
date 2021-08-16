@@ -197,7 +197,7 @@ class FilterableListForm(forms.Form):
         categories = self.get_categories()
 
         self.filterable_search.filter(
-            topics=self.cleaned_data.get('topics'),
+            topics=self.cleaned_data.get('t,opics'),
             categories=categories,
             language=self.cleaned_data.get('language'),
             to_date=self.cleaned_data.get('to_date'),
