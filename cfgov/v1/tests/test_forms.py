@@ -1,130 +1,135 @@
-import datetime
+from datetime import date, timedelta
 from unittest import mock
 
-from django.test import TestCase
+from django.core.exceptions import ValidationError
+from django.test import SimpleTestCase
 
 from freezegun import freeze_time
 
 from v1.forms import FilterableDateField, FilterableListForm
 
 
-class TestFilterableListForm(TestCase):
+@freeze_time('2021-08-18')
+class TestFilterableListForm(SimpleTestCase):
+    def setUp(self):
+        self.empty_cleaned_data = {
+            'archived': None,
+            'categories': [],
+            'from_date': None,
+            'language': [],
+            'title': None,
+            'to_date': None,
+            'topics': [],
+        }
 
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    def test_clean_returns_cleaned_data_if_in_future(self, mock_super, mock_init):
-        mock_init.return_value = None
-        from_date = datetime.date(2048, 1, 23)
-        to_date = from_date + datetime.timedelta(weeks=52)
-        form_data = {'from_date': from_date, 'to_date': to_date}
+    def make_cleaned_data(self, kwargs):
+        cleaned_data = dict(self.empty_cleaned_data)
+        cleaned_data.update(kwargs)
+        return cleaned_data
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {'from_date': '1/23/2048', 'to_date': '1/23/2049'}
-        form._errors = {}
+    def test_clean_no_dates(self):
+        form = FilterableListForm(data={})
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.empty_cleaned_data)
 
-        result = form.clean()
-        assert result['from_date'] == from_date
-        assert result['to_date'] == to_date
+    def test_clean_uses_today_if_to_date_is_empty(self):
+        from_date = date(2010, 1, 1)
 
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    @freeze_time("2017-07-04")
-    def test_clean_returns_cleaned_data_if_valid(self, mock_super, mock_init):
-        mock_init.return_value = None
-        from_date = datetime.date(2017, 7, 4)
-        to_date = from_date + datetime.timedelta(days=1)
-        form_data = {'from_date': from_date, 'to_date': to_date}
+        data = {'from_date': from_date}
+        form = FilterableListForm(data=data)
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {'from_date': '7/4/2017', 'to_date': '7/5/2017'}
-        form._errors = {}
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.make_cleaned_data({
+            'from_date': from_date,
+            'to_date': date(2021, 8, 18),
+        }))
 
-        result = form.clean()
-        assert result['from_date'] == from_date
-        assert result['to_date'] == to_date
+    def test_clean_both_dates(self):
+        from_date = date(2020, 1, 23)
+        to_date = from_date + timedelta(weeks=52)
 
-    @mock.patch('v1.forms.FilterableListForm.first_page_date')
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    @freeze_time("2017-01-15")
-    def test_clean_uses_earliest_result_if_fromdate_field_is_empty(self, mock_super, mock_init, mock_pub_date):
-        mock_init.return_value = None
-        from_date = None
-        to_date = datetime.date(2017, 1, 15)
-        form_data = {'from_date': from_date, 'to_date': to_date}
+        data = {'from_date': from_date, 'to_date': to_date}
+        form = FilterableListForm(data=data)
+        
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.make_cleaned_data(data))
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {'to_date': '1-15-2017'}
-        form._errors = {}
-        mock_pub_date.return_value = datetime.date(1995, 1, 1)
+    def test_clean_both_dates_in_future(self):
+        from_date = date(2048, 1, 23)
+        to_date = from_date + timedelta(weeks=52)
 
-        result = form.clean()
-        assert result['from_date'] == datetime.date(1995, 1, 1)
-        assert result['to_date'] == to_date
+        data = {'from_date': from_date, 'to_date': to_date}
+        form = FilterableListForm(data=data)
 
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    @freeze_time("2016-05-15")
-    def test_clean_uses_today_if_todate_field_is_empty(self, mock_super, mock_init):
-        mock_init.return_value = None
-        from_date = datetime.date(2016, 5, 15)
-        to_date = None
-        form_data = {'from_date': from_date, 'to_date': to_date}
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.make_cleaned_data(data))
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {'from_date': '5-15-2016'}
-        form._errors = {}
+    def test_clean_switches_date_fields_if_to_date_before_from_date(self):
+        to_date = date(2000, 3, 15)
+        from_date = to_date + timedelta(days=1)
+    
+        data = {'from_date': from_date, 'to_date': to_date}
+        form = FilterableListForm(data=data)
 
-        result = form.clean()
-        assert result['from_date'] == from_date
-        assert result['to_date'] == datetime.date.today()
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.make_cleaned_data({
+            'from_date': to_date,
+            'to_date': from_date,
+        }))
 
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    def test_clean_returns_cleaned_data_if_both_date_fields_are_empty(self, mock_super, mock_init):
-        mock_init.return_value = None
-        from_date = None
-        to_date = None
+    def test_clean_uses_from_date_min_if_to_date_set_but_not_from_date(self):
+        from_date_min = date(2010, 1, 1)
+        to_date = date(2020, 1, 1)
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = {'from_date': from_date, 'to_date': to_date}
-        form.cleaned_data = {'from_date': from_date, 'to_date': to_date}
-        form.data = {}
-        form._errors = {}
+        data = {'to_date': to_date}
+        form = FilterableListForm(data=data, from_date_min=from_date_min)
 
-        result = form.clean()
-        assert result['from_date'] == from_date
-        assert result['to_date'] == to_date
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.make_cleaned_data({
+            'from_date': from_date_min,
+            'to_date': to_date,
+        }))
 
+    def test_clean_ignores_from_date_min_if_no_dates_set(self):
+        from_date_min = date(2010, 1, 1)
 
-    @mock.patch('v1.forms.FilterableListForm.__init__')
-    @mock.patch('builtins.super')
-    @freeze_time("2000-03-15")
-    def test_clean_switches_date_fields_if_todate_is_less_than_fromdate(self, mock_super, mock_init):
-        mock_init.return_value = None
-        to_date = datetime.date(2000, 3, 15)
-        from_date = to_date + datetime.timedelta(days=1)
+        form = FilterableListForm(data={}, from_date_min=from_date_min)
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = {'from_date': from_date, 'to_date': to_date}
-        form.cleaned_data = {'from_date': from_date, 'to_date': to_date}
-        form.data = {'from_date': '3/16/2000', 'to_date': '3/15/2000'}
-        form._errors = {}
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data, self.empty_cleaned_data)
 
-        result = form.clean()
-        assert result['from_date'] == to_date
-        assert result['to_date'] == from_date
+    def test_clean_passes_through_date_validation_errors(self):
+        from_date_min = date(2010, 1, 1)
+        to_date = 'this is not a date and should fail validation'
+
+        data = {'to_date': to_date}
+        form = FilterableListForm(data=data, from_date_min=from_date_min)
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors, {
+            'to_date': ['You have entered an invalid date.'],
+        })
+
+    def check_clean_archived(self, value, expected_cleaned_value):
+        form = FilterableListForm(data={'archived': value})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data,
+            self.make_cleaned_data({'archived': expected_cleaned_value})
+        )
+
+    def test_clean_archived_include(self):
+        self.check_clean_archived('include', None)
+        
+    def test_clean_archived_exclude(self):
+        self.check_clean_archived('exclude', ['no', 'never'])
+
+    def test_clean_archived_only(self):
+        self.check_clean_archived('only', ['yes'])
 
 
-class TestFilterableDateField(TestCase):
+class TestFilterableDateField(SimpleTestCase):
     def test_default_required(self):
         field = FilterableDateField()
         self.assertFalse(field.required)
@@ -132,3 +137,36 @@ class TestFilterableDateField(TestCase):
     def test_set_required(self):
         field = FilterableDateField(required=True)
         self.assertTrue(field.required)
+
+    TEST_DATES = [
+        ('10/25/16', date(2016, 10, 25)),
+        ('13/4/21', date(2021, 4, 13)),
+        ('10-25-16', date(2016, 10, 25)),
+        ('2016-10-25', date(2016, 10, 25)),
+    ]
+
+    def test_clean_default_behavior(self):
+        field = FilterableDateField()
+
+        for text, value in self.TEST_DATES + [
+            ('10-2016', date(2016, 10, 1)),
+            ('2016', date(2016, 1, 1)),
+        ]:
+            self.assertEqual(field.clean(text), value)
+
+    def test_clean_is_end_date_behavior(self):
+        field = FilterableDateField(is_end_date=True)
+
+        for text, value in self.TEST_DATES + [
+            ('10-2016', date(2016, 10, 31)),
+            ('2016', date(2016, 12, 31)),
+        ]:
+            self.assertEqual(field.clean(text), value)
+
+    def test_validation_fails_on_dates_before_1900(self):
+        with self.assertRaises(ValidationError):
+            FilterableDateField().clean('1899-12-31')
+
+    def test_validation_fails_on_dates_before_1900_is_end_date(self):
+        with self.assertRaises(ValidationError):
+            FilterableDateField(is_end_date=True).clean('1899')
