@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from io import StringIO
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from wagtail.core.models import Site
 
@@ -115,6 +115,37 @@ class FilterablePagesDocumentTest(TestCase):
         doc = FilterablePagesDocument()
         prepared_data = doc.prepare(enforcement)
         self.assertEqual(prepared_data['products'], ['Fair Lending'])
+
+
+class FilterablePagesDocumentSearchTests(SimpleTestCase):
+    def test_search_default_all_pages(self):
+        search = FilterablePagesDocumentSearch()
+        self.assertEqual(search.search_obj.to_dict(), {
+            'query': {'bool': {'filter': [{'prefix': {'url': '/'}}]}}
+        })
+
+    def test_search_prefix_only(self):
+        search = FilterablePagesDocumentSearch(prefix='/foo/bar/')
+        self.assertEqual(search.search_obj.to_dict(), {
+            'query': {'bool': {'filter': [{'prefix': {'url': '/foo/bar/'}}]}}
+        })
+
+    def test_search_children_only(self):
+        search = FilterablePagesDocumentSearch(children_only=True)
+        self.assertEqual(search.search_obj.to_dict(), {
+            'query': {'bool': {'filter': [{'regexp': {'url': '/[^/]*/'}}]}}
+        })
+
+    def test_search_prefix_and_children_only(self):
+        search = FilterablePagesDocumentSearch(
+            prefix='/foo/bar/',
+            children_only=True
+        )
+        self.assertEqual(search.search_obj.to_dict(), {
+            'query': {
+                'bool': {'filter': [{'regexp': {'url': '/foo/bar/[^/]*/'}}]},
+            },
+        })
 
 
 class FilterablePagesDocumentSearchTest(ElasticsearchTestsMixin, TestCase):

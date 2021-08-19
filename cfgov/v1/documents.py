@@ -113,13 +113,19 @@ class FilterablePagesDocument(Document):
 
 
 class FilterablePagesDocumentSearch:
+    def __init__(self, prefix='/', children_only=False):
+        self.search_obj = FilterablePagesDocument.search()
 
-    def __init__(self, prefix='/'):
-        self.prefix = prefix
-        self.document = FilterablePagesDocument()
-        self.search_obj = self.document.search().filter(
-            'prefix', url=prefix
-        )
+        if children_only:
+            self.search_obj = self.search_obj.filter(
+                'regexp',
+                url=prefix + '[^/]*/'
+            )
+        else:
+            self.search_obj = self.search_obj.filter(
+                'prefix',
+                url=prefix
+            )
 
     def filter_topics(self, topics=[]):
         if topics not in ([], '', None):

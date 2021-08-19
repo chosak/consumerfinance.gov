@@ -77,6 +77,13 @@ class FilterableListMixin(RoutablePageMixin):
         stats = search.get_stats()
 
         form_cls = self.get_form_class()
+        form = form_cls(
+            categories=category_choices,
+            topics=stats.topic_choices,
+            languages=stats.language_choices,
+            from_date_min=stats.start_date_min,
+            data=request.GET
+        )
 
         total_results = stats.hits.total.value
         form = form_cls(
