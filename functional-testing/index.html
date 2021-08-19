@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Functional Testing - cfgov-refresh</title>
+  <title>Functional Testing - consumerfinance.gov</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -37,7 +37,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> cfgov-refresh</a>
+        <a href=".." class="icon icon-home"> consumerfinance.gov</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
@@ -127,6 +127,14 @@
                 </li>
                 <li class="">
                     
+    <a class="" href="../filterable-lists/">Filterable Lists</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../search/">Search</a>
+                </li>
+                <li class="">
+                    
     <a class="" href="../split-testing/">Split Testing</a>
                 </li>
                 <li class="">
@@ -140,10 +148,6 @@
 		
     <span class="caption-text">Testing</span>
     <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../browser-acceptance-tests/">Browser/Acceptance Testing</a>
-                </li>
                 <li class="">
                     
     <a class="" href="../javascript-unit-tests/">JavaScript Unit Testing</a>
@@ -170,6 +174,14 @@
     
 
     </ul>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../profiling-django/">Profiling Django</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../other-front-end-testing/">Other Front-end Testing</a>
                 </li>
     </ul>
 	    </li>
@@ -219,10 +231,6 @@
                 </li>
                 <li class="">
                     
-    <a class="" href="../hmda/">HMDA Data</a>
-                </li>
-                <li class="">
-                    
     <a class="" href="../website-feedback/">Website Feedback</a>
                 </li>
     </ul>
@@ -238,7 +246,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">cfgov-refresh</a>
+        <a href="..">consumerfinance.gov</a>
       </nav>
 
       
@@ -257,7 +265,7 @@
     <li>Functional Testing</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/cfpb/cfgov-refresh/edit/master/docs/functional-testing.md"
+        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/functional-testing.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -274,15 +282,19 @@
 <h2 id="running-cypress">Running Cypress<a class="headerlink" href="#running-cypress" title="Permanent link">¶</a></h2>
 <p>We support both a headless docker container to execute our cypress tests as well as the already installed desktop application that comes packaged with cypress. The test files are located in the <code>test/cypress/integration/</code> directory.</p>
 <ul>
-<li>To run the docker container execute <code>docker-compose -f docker-compose.e2e.yml run e2e</code></li>
+<li>To run a single docker container use <code>docker-compose -f docker-compose.e2e.yml run admin-tests</code></li>
+<li>To run all docker containers execute <code>docker-compose -f docker-compose.e2e.yml up</code></li>
 <li>
-<p>If you have not previously set up a local Docker network, you will need to stop any running cfgov-refresh Docker containers, run <code>docker network create cfgov</code>, start the containers again, and then run the above command.</p>
+<p>If you have not previously set up a local Docker network, you will need to stop any running consumerfinance.gov Docker containers, run <code>docker network create cfgov</code>, start the containers again, and then run the above command.</p>
 </li>
 <li>
 <p>To run the desktop cypress aplication execute <code>yarn run cypress open</code> and select your test file to execute.</p>
 </li>
 <li>
 <p>To run the tests from the commandline you can also invoke them via <code>yarn run cypress run</code>. You can read more about different command line arguments in the <a href="https://docs.cypress.io/guides/guides/command-line.html#Options">Command-Line Documentation</a> provided by Cypress.</p>
+</li>
+<li>
+<p>To run the tests against a server other than <code>http://localhost:8000</code>, you can pass in an override for the <code>baseUrl</code> config value; for example:<code>yarn run cypress open --config baseUrl=http://staging_url</code>.</p>
 </li>
 </ul>
 <h2 id="writing-cypress-tests">Writing Cypress Tests<a class="headerlink" href="#writing-cypress-tests" title="Permanent link">¶</a></h2>
@@ -333,7 +345,7 @@ describe('Consumer Tools', () =&gt; {
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../branching-merging/" class="btn btn-neutral float-right" title="Branching and Merging">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../profiling-django/" class="btn btn-neutral float-right" title="Profiling Django">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
         <a href="../python-unit-tests/" class="btn btn-neutral" title="Python Unit Testing"><span class="icon icon-circle-arrow-left"></span> Previous</a>
@@ -361,13 +373,13 @@ describe('Consumer Tools', () =&gt; {
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/cfpb/cfgov-refresh/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../python-unit-tests/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../branching-merging/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../profiling-django/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

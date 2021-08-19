@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Split Testing - cfgov-refresh</title>
+  <title>Split Testing - consumerfinance.gov</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -37,7 +37,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> cfgov-refresh</a>
+        <a href=".." class="icon icon-home"> consumerfinance.gov</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
@@ -125,6 +125,14 @@
                     
     <a class="" href="../feature-flags/">Feature Flags</a>
                 </li>
+                <li class="">
+                    
+    <a class="" href="../filterable-lists/">Filterable Lists</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../search/">Search</a>
+                </li>
                 <li class=" current">
                     
     <a class="current" href="./">Split Testing</a>
@@ -153,10 +161,6 @@
     <ul class="subnav">
                 <li class="">
                     
-    <a class="" href="../browser-acceptance-tests/">Browser/Acceptance Testing</a>
-                </li>
-                <li class="">
-                    
     <a class="" href="../javascript-unit-tests/">JavaScript Unit Testing</a>
                 </li>
                 <li class="">
@@ -166,6 +170,14 @@
                 <li class="">
                     
     <a class="" href="../functional-testing/">Functional Testing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../profiling-django/">Profiling Django</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../other-front-end-testing/">Other Front-end Testing</a>
                 </li>
     </ul>
 	    </li>
@@ -215,10 +227,6 @@
                 </li>
                 <li class="">
                     
-    <a class="" href="../hmda/">HMDA Data</a>
-                </li>
-                <li class="">
-                    
     <a class="" href="../website-feedback/">Website Feedback</a>
                 </li>
     </ul>
@@ -234,7 +242,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">cfgov-refresh</a>
+        <a href="..">consumerfinance.gov</a>
       </nav>
 
       
@@ -253,7 +261,7 @@
     <li>Split Testing</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/cfpb/cfgov-refresh/edit/master/docs/split-testing.md"
+        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/split-testing.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -293,7 +301,7 @@ def in_split_testing_cluster(cluster_group, page, clusters=CLUSTERS, **kwargs):
 - <code>page</code>: An instance of a Wagtail page that we want to look for in the
   cluster group
 - <code>clusters</code>: A dictionary containing one or more named <code>cluster_group</code>s –
-  by default, this points to a dictionary defined in our master cluster
+  by default, this points to a dictionary defined in our main cluster
   definition file (see <a href="#defining-clusters">"Defining clusters"</a> below)</p>
 <p>If the <code>page</code>'s <code>id</code> property is found in the <code>cluster_group</code>,
 the condition returns <code>True</code>.
@@ -302,7 +310,7 @@ instead of <code>page.id</code>. (More on that later.)</p>
 <p>You do not need to modify anything in this file to set up a new experiment.</p>
 <h3 id="defining-clusters">Defining clusters<a class="headerlink" href="#defining-clusters" title="Permanent link">¶</a></h3>
 <p>To run a split test we first have to know what pages we're testing.
-Split testing clusters are typically defined in our master cluster definition
+Split testing clusters are typically defined in our main cluster definition
 file at <code>cfgov/core/split_testing_clusters.py</code>.</p>
 <p>Create a new dictionary with a meaningful name
 and add the page IDs for the pages in your cluster(s) to it.
@@ -429,7 +437,7 @@ until you take the time to remove the flag entirely.</p>
         <a href="../translation/" class="btn btn-neutral float-right" title="Translation">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../feature-flags/" class="btn btn-neutral" title="Feature Flags"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../search/" class="btn btn-neutral" title="Search"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -454,10 +462,10 @@ until you take the time to remove the flag entirely.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/cfpb/cfgov-refresh/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../feature-flags/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../search/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
         <span style="margin-left: 15px"><a href="../translation/" style="color: #fcfcfc">Next &raquo;</a></span>

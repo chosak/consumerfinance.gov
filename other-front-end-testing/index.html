@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Forms in Wagtail Page Context - consumerfinance.gov</title>
+  <title>Other Front-end Testing - consumerfinance.gov</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -18,8 +18,8 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "Forms in Wagtail Page Context";
-    var mkdocs_page_input_path = "forms-in-wagtail.md";
+    var mkdocs_page_name = "Other Front-end Testing";
+    var mkdocs_page_input_path = "other-front-end-testing.md";
     var mkdocs_page_url = null;
   </script>
   
@@ -102,14 +102,9 @@
                     
     <a class="" href="../migrations/">Django and Wagtail Migrations</a>
                 </li>
-                <li class=" current">
+                <li class="">
                     
-    <a class="current" href="./">Forms in Wagtail Page Context</a>
-    <ul class="subnav">
-            
-    
-
-    </ul>
+    <a class="" href="../forms-in-wagtail/">Forms in Wagtail Page Context</a>
                 </li>
                 <li class="">
                     
@@ -169,9 +164,22 @@
                     
     <a class="" href="../profiling-django/">Profiling Django</a>
                 </li>
-                <li class="">
+                <li class=" current">
                     
-    <a class="" href="../other-front-end-testing/">Other Front-end Testing</a>
+    <a class="current" href="./">Other Front-end Testing</a>
+    <ul class="subnav">
+            
+    
+        <ul>
+        
+            <li><a class="toctree-l4" href="#performance-testing">Performance testing</a></li>
+        
+            <li><a class="toctree-l4" href="#source-code-linting">Source code linting</a></li>
+        
+        </ul>
+    
+
+    </ul>
                 </li>
     </ul>
 	    </li>
@@ -248,14 +256,14 @@
     
       
         
-          <li>Pages and Components &raquo;</li>
+          <li>Testing &raquo;</li>
         
       
     
-    <li>Forms in Wagtail Page Context</li>
+    <li>Other Front-end Testing</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/forms-in-wagtail.md"
+        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/other-front-end-testing.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -265,49 +273,33 @@
           <div role="main">
             <div class="section">
               
-                <h1 id="including-forms-into-wagtail-page-context">Including forms into Wagtail page context<a class="headerlink" href="#including-forms-into-wagtail-page-context" title="Permanent link">¶</a></h1>
-<p>Wagtail provides a FormBuilder module, but it cannot be used with subclasses of Page, like our CFGOVPage. For our purposes there is <code>AbstractFormBlock</code>, a subclass of StructBlock that implements methods to process a request. If a developer wishes to add a module that includes a form, they only need to follow a few steps in order to get it handled properly:</p>
-<ol>
-<li>Create the form.</li>
-<li>Create handler class that implements a method named <code>process</code>.<ul>
-<li>The process method should take in a boolean parameter named <code>is_submitted</code> that flags whether or not that particular module has been the source of the request.</li>
-<li>The process method should return a dictionary that will be included in the context of the page and a JSONResponse for AJAX requests. If a context is returned, this is where the form would go.</li>
+                <h1 id="other-front-end-testing">Other Front-end Testing<a class="headerlink" href="#other-front-end-testing" title="Permanent link">¶</a></h1>
+<h2 id="performance-testing">Performance testing<a class="headerlink" href="#performance-testing" title="Permanent link">¶</a></h2>
+<p>To audit if the site complies with performance best practices and guidelines,
+<a href="https://github.com/GoogleChrome/lighthouse">Google's Lighthouse</a> can be run
+from Google Chrome by opening the developer console and going to the Lighthouse
+tab to run a performance audit.</p>
+<p>We also have an automated task that generates a lighthouse report every night at
+<a href="https://cfpb.github.io/cfgov-lighthouse/">https://cfpb.github.io/cfgov-lighthouse/</a>
+(<a href="https://cfpb.github.io/cfgov-lighthouse/">repository</a>).</p>
+<h2 id="source-code-linting">Source code linting<a class="headerlink" href="#source-code-linting" title="Permanent link">¶</a></h2>
+<p>The default test task includes linting of the JavaScript source, build,
+and test files.
+Use the <code>gulp lint</code> command from the command-line to run the ESLint linter,
+which checks the JavaScript against the rules configured in <code>.eslintrc</code>.
+<a href="https://eslint.org/docs/rules/">See the ESLint docs</a>
+for detailed rule descriptions.</p>
+<p>There are a number of options to the command:</p>
+<ul>
+<li><code>gulp lint:build</code>: Lint only the gulp build scripts.</li>
+<li><code>gulp lint:test</code>: Lint only the test scripts.</li>
+<li><code>gulp lint:scripts</code>: Lint only the project source scripts.</li>
+<li><code>--fix</code>: Add this flag (like <code>gulp lint --fix</code> or <code>gulp lint:build --fix</code>).
+   to auto-fix some errors, where ESLint has support to do so.</li>
+<li><code>--path</code>: Add this flag to specify a file to lint,
+   rather than all files. Path is relative to the project root,
+   such as <code>gulp lint --path=cfgov/unprocessed/js/modules/Analytics.js</code>.</li>
 </ul>
-</li>
-<li>Create a subclass of <code>AbstractFormBlock</code> with any other blocks that are required.<ul>
-<li>Add the path to the handler class to the block class' Meta handler attribute.</li>
-</ul>
-</li>
-<li>Create a template in which to render the form.</li>
-</ol>
-<p>Here's an example of a form's block class:
-<pre class="highlight"><code class="language-python">...
-
-class FormBlock(AbstractFormBlock):
-    heading = blocks.CharBlock()
-
-    class Meta:
-        handler = 'app_name.handlers.handler_class'
-        # defaults
-        method = 'POST'
-        icon = 'form'
-
-...</code></pre></p>
-<p>And an example of a handler class:
-<pre class="highlight"><code class="language-python">...
-
-class ConferenceRegistrationHandler(Handler):
-    def process(self, is_submitted):
-        if is_submitted:
-            form = Form(self.request.POST)
-            if form.is_valid():
-                return success
-            else:
-                return fail
-
-        return {'form': Form()}
-
-...</code></pre></p>
               
             </div>
           </div>
@@ -315,10 +307,10 @@ class ConferenceRegistrationHandler(Handler):
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../wagtail-pages/" class="btn btn-neutral float-right" title="Wagtail Pages">Next <span class="icon icon-circle-arrow-right"></span></a>
+        <a href="../branching-merging/" class="btn btn-neutral float-right" title="Branching and Merging">Next <span class="icon icon-circle-arrow-right"></span></a>
       
       
-        <a href="../migrations/" class="btn btn-neutral" title="Django and Wagtail Migrations"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../profiling-django/" class="btn btn-neutral" title="Profiling Django"><span class="icon icon-circle-arrow-left"></span> Previous</a>
       
     </div>
   
@@ -346,10 +338,10 @@ class ConferenceRegistrationHandler(Handler):
           <a href="https://github.com/cfpb/consumerfinance.gov/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
-        <span><a href="../migrations/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+        <span><a href="../profiling-django/" style="color: #fcfcfc;">&laquo; Previous</a></span>
       
       
-        <span style="margin-left: 15px"><a href="../wagtail-pages/" style="color: #fcfcfc">Next &raquo;</a></span>
+        <span style="margin-left: 15px"><a href="../branching-merging/" style="color: #fcfcfc">Next &raquo;</a></span>
       
     </span>
 </div>

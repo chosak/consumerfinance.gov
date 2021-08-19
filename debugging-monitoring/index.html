@@ -8,7 +8,7 @@
   
   
   <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>Debugging and Monitoring - cfgov-refresh</title>
+  <title>Debugging and Monitoring - consumerfinance.gov</title>
   <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
 
   <link rel="stylesheet" href="../css/theme.css" type="text/css" />
@@ -37,7 +37,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> cfgov-refresh</a>
+        <a href=".." class="icon icon-home"> consumerfinance.gov</a>
         <div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
@@ -82,6 +82,8 @@
             <li><a class="toctree-l4" href="#using-django-debug-toolbar">Using Django Debug Toolbar</a></li>
         
             <li><a class="toctree-l4" href="#logging-database-queries-to-console">Logging database queries to console</a></li>
+        
+            <li><a class="toctree-l4" href="#logging-elasticsearch-queries-to-console">Logging Elasticsearch queries to console</a></li>
         
             <li><a class="toctree-l4" href="#monitoring-using-new-relic">Monitoring using New Relic</a></li>
         
@@ -142,6 +144,14 @@
                 </li>
                 <li class="">
                     
+    <a class="" href="../filterable-lists/">Filterable Lists</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../search/">Search</a>
+                </li>
+                <li class="">
+                    
     <a class="" href="../split-testing/">Split Testing</a>
                 </li>
                 <li class="">
@@ -157,10 +167,6 @@
     <ul class="subnav">
                 <li class="">
                     
-    <a class="" href="../browser-acceptance-tests/">Browser/Acceptance Testing</a>
-                </li>
-                <li class="">
-                    
     <a class="" href="../javascript-unit-tests/">JavaScript Unit Testing</a>
                 </li>
                 <li class="">
@@ -170,6 +176,14 @@
                 <li class="">
                     
     <a class="" href="../functional-testing/">Functional Testing</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../profiling-django/">Profiling Django</a>
+                </li>
+                <li class="">
+                    
+    <a class="" href="../other-front-end-testing/">Other Front-end Testing</a>
                 </li>
     </ul>
 	    </li>
@@ -219,10 +233,6 @@
                 </li>
                 <li class="">
                     
-    <a class="" href="../hmda/">HMDA Data</a>
-                </li>
-                <li class="">
-                    
     <a class="" href="../website-feedback/">Website Feedback</a>
                 </li>
     </ul>
@@ -238,7 +248,7 @@
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
         <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">cfgov-refresh</a>
+        <a href="..">consumerfinance.gov</a>
       </nav>
 
       
@@ -257,7 +267,7 @@
     <li>Debugging and Monitoring</li>
     <li class="wy-breadcrumbs-aside">
       
-        <a href="https://github.com/cfpb/cfgov-refresh/edit/master/docs/debugging-monitoring.md"
+        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/debugging-monitoring.md"
           class="icon icon-github"> Edit on GitHub</a>
       
     </li>
@@ -293,6 +303,15 @@ including the server and management commands:</p>
 <pre class="highlight"><code class="language-sh">$ ENABLE_SQL_LOGGING=1 ./runserver.sh
 $ ENABLE_SQL_LOGGING=1 cfgov/manage.py some_management_command</code></pre>
 
+<h3 id="logging-elasticsearch-queries-to-console">Logging Elasticsearch queries to console<a class="headerlink" href="#logging-elasticsearch-queries-to-console" title="Permanent link">¶</a></h3>
+<p>Similarly, to log Elasticsearch queries to the console when running locally,
+define the <code>ENABLE_ES_LOGGING</code> environment variable.</p>
+<p>This will log any Elasticsearch queries (and time taken to execute them)
+to the console, and works with any Django code invoked from the shell,
+including the server and management commands:</p>
+<pre class="highlight"><code class="language-sh">$ ENABLE_ES_LOGGING=1 ./runserver.sh
+$ ENABLE_ES_LOGGING=1 cfgov/manage.py some_management_command</code></pre>
+
 <h3 id="monitoring-using-new-relic">Monitoring using New Relic<a class="headerlink" href="#monitoring-using-new-relic" title="Permanent link">¶</a></h3>
 <p>This project can be configured for real-time monitoring with
 <a href="https://newrelic.com/">New Relic</a>. This requires an active New Relic account
@@ -303,7 +322,7 @@ from
 <a href="https://pypi.org/project/newrelic/">from PyPI</a>.
 This package is not part of the standard development requirements but is
 included in
-the <a href="https://github.com/cfpb/cfgov-refresh/blob/master/requirements/deployment.txt"><code>requirements/deployment.txt</code></a> file.
+the <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/requirements/deployment.txt"><code>requirements/deployment.txt</code></a> file.
 It can be installed into your Python environment using the following command:</p>
 <pre class="highlight"><code class="language-shell">$ pip install newrelic</code></pre>
 
@@ -317,7 +336,7 @@ in the web browser.</p>
 <a href="https://docs.newrelic.com/docs/agents/python-agent/configuration/python-agent-configuration">configuration settings</a>
 that control the information that gets recorded about web requests. This
 project includes a default
-<a href="https://github.com/cfpb/cfgov-refresh/blob/master/cfgov/newrelic.ini"><code>newrelic.ini</code></a>
+<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/newrelic.ini"><code>newrelic.ini</code></a>
 file that enables New Relic's
 <a href="https://docs.newrelic.com/docs/agents/manage-apm-agents/configuration/high-security-mode">high security mode</a>
 to limit the recording of potentially sensitive information.</p>
@@ -331,19 +350,17 @@ two environment variables:</p>
 traffic from any other users who may be running against the same New Relic
 account.</p>
 <p>This project's
-<a href="https://github.com/cfpb/cfgov-refresh/blob/master/.env_SAMPLE"><code>.env_SAMPLE</code></a>
+<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/.env_SAMPLE"><code>.env_SAMPLE</code></a>
 file contains placeholder entries for these two variables.</p>
 <p>Once you've set these two variables, start or restart your local web server.</p>
 <p>When you make your first web request, you'll see messages in the console
-indicating that the New Relic Python agent has been activated. You should see
-a message indicating your select application name:</p>
-<pre class="highlight"><code class="language-txt">Successfully registered New Relic Python agent where app_name='cf.gov myname python'...</code></pre>
+indicating that the New Relic Python agent has been activated. You should also
+see a message containing a link to the New Relic console:</p>
+<pre class="highlight"><code class="language-txt">Reporting to: https://rpm.newrelic.com/accounts/XXXXXXXX/applications/XXXXXXXX</code></pre>
 
-<p>as well as a message indicating the use of high security mode:</p>
-<pre class="highlight"><code class="language-txt">High Security Mode is being applied to all communications between the agent and the data collector for this session.</code></pre>
-
-<p>You should now be able to navigate to the New Relic console and, after a few
-seconds, see your web server traffic in New Relic APM and New Relic Browser.</p>
+<p>You should now be able to use that link to navigate to the New Relic console
+and, after a few seconds, see your web server traffic in New Relic APM and
+New Relic Browser.</p>
               
             </div>
           </div>
@@ -379,7 +396,7 @@ seconds, see your web server traffic in New Relic APM and New Relic Browser.</p>
   <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
-          <a href="https://github.com/cfpb/cfgov-refresh/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
       
       
         <span><a href="../running-docker/" style="color: #fcfcfc;">&laquo; Previous</a></span>
