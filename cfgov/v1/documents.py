@@ -19,7 +19,6 @@ from v1.models.newsroom_page import LegacyNewsroomPage, NewsroomPage
 
 @registry.register_document
 class FilterablePagesDocument(Document):
-
     tags = fields.ObjectField(properties={
         'slug': fields.KeywordField(),
         'name': fields.TextField()
@@ -37,10 +36,11 @@ class FilterablePagesDocument(Document):
     end_dt = fields.DateField()
     statuses = fields.KeywordField()
     products = fields.KeywordField()
-    initial_filing_date = fields.DateField()
     model_class = fields.KeywordField()
     content = fields.TextField()
     preview_description = fields.TextField()
+
+    filter_date = fields.DateField()
 
     def get_queryset(self):
         return AbstractFilterPage.objects.live().public().specific()
