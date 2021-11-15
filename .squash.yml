@@ -1,0 +1,24 @@
+deployments:
+  cf.gov:
+    dockerimage: python:3.6-alpine
+    environment:
+      - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
+    build_steps:
+      - pwd
+      - ls -la
+      - cd /code
+      - ls -la
+      - cp .env_SAMPLE .env
+      - pip install -U pip
+      - pip install -r requirements/local.txt
+    launch_steps:
+      - cd /code
+      - cfgov/manage.py runserver 0.0.0.0:8000
+    port_forwarding: 80:8000
+  postgres:
+    dockerimage: postgres:10-alpine
+    environment:
+      - POSTGRES_USER: cfpb
+      - POSTGRES_PASSWORD: cfpb
+      - POSTGRES_DB: cfgov
+    port_forwarding: 5432:5432
