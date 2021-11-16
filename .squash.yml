@@ -1,16 +1,19 @@
 deployments:
   cf.gov:
-    dockerimage: centos/python-36-centos7:latest
+    dockerimage: centos:7
     environment:
       - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
-    build_options: -u 0
+      - LANG: en_US.UTF-8
     build_steps:
-      - whoami
-      - yum update
-      - yum install postgresql
+      - yum install -y python3
+      - ln -fs /usr/bin/python3.6 /usr/bin/python
+      - LANG=en_US.UTF-8 python -c 'import os; print(os.getenv("LANG"))'
+      - python -c 'import os; print(os.getenv("LC_ALL"))'
+      - python -c 'import os; print(os.getenv("PYTHONIOENCODING"))'
+      - python --version
+      - python -m pip install -U pip
       - cd /code
-      - pip install -U pip
-      - pip install -r requirements/local.txt
+      - LANG=en_US.UTF-8 python -m pip install -r requirements/local.txt
     launch_steps:
       - cd /code
       - cfgov/manage.py runserver 0.0.0.0:8000
