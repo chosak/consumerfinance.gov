@@ -1,6 +1,6 @@
 deployments:
   cf.gov:
-    dockerimage: python:3.6-alpine
+    dockerimage: python:3.6
     environment:
       - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
     build_steps:
