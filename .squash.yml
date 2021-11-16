@@ -4,11 +4,7 @@ deployments:
     environment:
       - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
     build_steps:
-      - pwd
-      - ls -la
       - cd /code
-      - ls -la
-      - cp .env_SAMPLE .env
       - pip install -U pip
       - pip install -r requirements/local.txt
     launch_steps:
