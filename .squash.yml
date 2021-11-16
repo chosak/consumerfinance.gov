@@ -3,8 +3,10 @@ deployments:
     dockerimage: centos/python-36-centos7:latest
     environment:
       - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
+    build_options: -u 0
     build_steps:
-      - sudo yum update
+      - whoami
+      - yum update
       - yum install postgresql
       - cd /code
       - pip install -U pip
