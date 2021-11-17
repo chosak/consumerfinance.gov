@@ -2,19 +2,26 @@ deployments:
   cf.gov:
     dockerimage: centos:7
     environment:
-      - DATABASE_URL: postgres://cfpb:cfpb@postgres/cfgov
-      - LANG: en_US.UTF-8
+      - DATABASE_URL: postgres://cfpb@localhost/cfgov
     build_steps:
+      # Install PostgreSQL 10 and start the DB service.
+      - yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+      - yum install -y postgresql10-server
+      - /usr/pgsql-10/bin/postgresql-10-setup initdb
+      - systemctl enable postgresql.service
+      - systemctl start postgresql.service
+      # Install Python 3.6.
       - yum install -y python3
       - ln -fs /usr/bin/python3.6 /usr/bin/python
-      - LANG=en_US.UTF-8 python -c 'import os; print(os.getenv("LANG"))'
-      - python -c 'import os; print(os.getenv("LC_ALL"))'
-      - python -c 'import os; print(os.getenv("PYTHONIOENCODING"))'
-      - python --version
-      - python -m pip install -U pip
+      # Install the application dependencies.
       - cd /code
+      - python -m pip install -U pip
       - LANG=en_US.UTF-8 python -m pip install -r requirements/local.txt
+      # Create the Django database.
+      - createuser --createdb cfpb && createdb -O cfpb cfgov
     launch_steps:
       - cd /code
+      # Create the Django database tables and run the server.
+      - cfgov/manage.py migrate
       - cfgov/manage.py runserver 0.0.0.0:8000
     port_forwarding: 80:8000
