@@ -1,15 +1,12 @@
 deployments:
+  postgres:
+    dockerimage: postgres:10.18-alpine
+    port_forwarding: 5432:5432
   cf.gov:
     dockerimage: centos:7
     environment:
       - DATABASE_URL: postgres://cfpb@localhost/cfgov
     build_steps:
-      # Install PostgreSQL 10 and start the DB service.
-      - yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-      - yum install -y postgresql10-server
-      - /usr/pgsql-10/bin/postgresql-10-setup initdb
-      - systemctl enable postgresql.service
-      - systemctl start postgresql.service
       # Install Python 3.6.
       - yum install -y python3
       - ln -fs /usr/bin/python3.6 /usr/bin/python
