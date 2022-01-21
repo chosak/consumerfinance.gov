@@ -1,5 +1,4 @@
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.template.response import TemplateResponse
 
 from wagtail.contrib.routable_page.models import route
 from wagtailsharing.models import ShareableRoutablePageMixin
@@ -157,16 +156,8 @@ class FilterableListMixin(ShareableRoutablePageMixin):
                 self.set_do_not_index(field, value)
         return form_data, has_active_filters
 
-    def render(self, request, *args, context_overrides=None, **kwargs):
-        """Render with optional context overrides."""
-        # TODO: the context-overriding and template rendering can be replaced
-        # with super().render() in Wagtail 2.11, where RoutablePageMixin gains
-        # the context_overrides functionality built-in.
-        context = self.get_context(request, *args, **kwargs)
-        context.update(context_overrides or {})
-        response = TemplateResponse(
-            request, self.get_template(request, *args, **kwargs), context
-        )
+    def render(self, *args, **kwargs):
+        response = super().render(*args, **kwargs)
 
         # Set noindex for crawlers if needed
         if self.do_not_index:
