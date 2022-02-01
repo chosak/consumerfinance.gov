@@ -7,7 +7,6 @@ from flags.state import flag_enabled
 
 from v1.documents import FilterablePagesDocumentSearch
 from v1.feeds import FilterableFeed
-from v1.models.learn_page import AbstractFilterPage
 from v1.util.ref import get_category_children
 from v1.util.util import get_secondary_nav_items
 
@@ -24,10 +23,6 @@ class FilterableListMixin(ShareableRoutablePageMixin):
     filterable_categories = None
     """Used for activity-log and newsroom to determine
        which pages to render when sitewide"""
-
-    @staticmethod
-    def get_model_class():
-        return AbstractFilterPage
 
     @staticmethod
     def get_form_class():

@@ -17,12 +17,10 @@ from v1.documents import (
     EventFilterablePagesDocumentSearch,
 )
 from v1.models.base import CFGOVPage
-from v1.models.enforcement_action_page import EnforcementActionPage
 from v1.models.filterable_list_mixins import (
     CategoryFilterableMixin,
     FilterableListMixin,
 )
-from v1.models.learn_page import EventPage
 
 
 class BrowseFilterableContent(StreamBlock):
@@ -93,20 +91,12 @@ class EnforcementActionsFilterPage(BrowseFilterablePage):
         return forms.EnforcementActionsFilterForm
 
     @staticmethod
-    def get_model_class():
-        return EnforcementActionPage
-
-    @staticmethod
     def get_search_class():
         return EnforcementActionFilterablePagesDocumentSearch
 
 
 class EventArchivePage(BrowseFilterablePage):
     template = "browse-filterable/index.html"
-
-    @staticmethod
-    def get_model_class():
-        return EventPage
 
     @staticmethod
     def get_form_class():
