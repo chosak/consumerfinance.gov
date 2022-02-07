@@ -52,13 +52,6 @@ class TestFilterableListMixin(TestCase):
         self.mixin.process_form(mock_request, mock_form)
         assert mock_form.is_valid.called
 
-    def test_filterable_pages_not_in_site_returns_no_pages(self):
-        class MockPageInDefaultSite(FilterableListMixin):
-            def get_site(self):
-                return None
-
-        self.assertIsNone(MockPageInDefaultSite().get_filterable_search())
-
     # FilterableListMixin.set_do_not_index tests
     def test_do_not_index_is_false_by_default(self):
         assert self.mixin.do_not_index is False

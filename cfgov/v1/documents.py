@@ -115,10 +115,16 @@ class FilterablePagesDocument(Document):
 
 
 class FilterablePagesDocumentSearch:
-    def __init__(self, prefix="/"):
-        self.prefix = prefix
-        self.document = FilterablePagesDocument()
-        self.search_obj = self.document.search().filter("prefix", url=prefix)
+    def __init__(self, page, children_only=False):
+        search = FilterablePagesDocument.search()
+        search = search.filter("prefix", path=page.path)
+
+        if children_only:
+            search = search.filter("term", depth=page.depth + 1)
+        else:
+            search = search.filter("range", depth={"gt": page.depth})
+
+        self.search_obj = search
 
     def filter_topics(self, topics=None):
         if topics is None:

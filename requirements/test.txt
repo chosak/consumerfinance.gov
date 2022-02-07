@@ -7,3 +7,4 @@ model-bakery==1.1.0
 moto==1.3.6
 pip==21.1.2
 responses==0.9.0
+wagtail-foliage==0.1.1

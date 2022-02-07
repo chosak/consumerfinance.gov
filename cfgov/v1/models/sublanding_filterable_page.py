@@ -75,3 +75,7 @@ class ActivityLogPage(CategoryFilterableMixin, SublandingFilterablePage):
     template = "activity-log/index.html"
     filterable_categories = ("Blog", "Newsroom", "Research Report")
     filterable_per_page_limit = 100
+
+    def get_filterable_root(self):
+        if site := self.get_site():
+            return site.root_page

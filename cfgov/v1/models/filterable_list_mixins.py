@@ -41,23 +41,21 @@ class FilterableListMixin(ShareableRoutablePageMixin):
         )
 
     def get_filterable_root(self):
+        return self
+
+    def filter_children_only(self):
         filterable_list_block = self.get_filterable_list_wagtail_block()
+
         if filterable_list_block is None:
-            return "/"
+            return False
 
-        if filterable_list_block.value["filter_children"]:
-            return self.get_url()
-
-        return "/"
+        return filterable_list_block.value["filter_children"]
 
     def get_filterable_search(self):
-        """Return a FilterablePagesDocumentSearch object"""
-        site = self.get_site()
-
-        if not site:
-            return None
-
-        return self.get_search_class()(prefix=self.get_filterable_root())
+        return self.get_search_class()(
+            page=self.get_filterable_root(),
+            children_only=self.filter_children_only(),
+        )
 
     def get_cache_key_prefix(self):
         return self.url
@@ -191,8 +189,7 @@ class CategoryFilterableMixin:
         By default this is an empty list and all page tags are eligible.
         """
         category_names = get_category_children(self.filterable_categories)
-        filterable_search = self.get_search_class()(
-            prefix=self.get_filterable_root()
-        )
-        filterable_search.filter_categories(categories=category_names)
-        return filterable_search
+
+        search = super().get_filterable_search()
+        search.filter_categories(categories=category_names)
+        return search
