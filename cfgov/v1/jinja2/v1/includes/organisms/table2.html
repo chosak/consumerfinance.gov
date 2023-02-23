@@ -1,0 +1,24 @@
+{% include_block value.heading %}
+
+<table class="o-table
+    {{- ' o-table__stack-on-small' if 'is_stacked' in value.options else '' -}}
+    {{- ' o-table__striped' if 'is_striped' in value.options else '' -}}
+    {{- ' u-w100pct' if 'is_full_wdith' in value.options else '' -}}
+">
+                  <thead>
+                      <tr>
+                          {% for col in value.columns %}
+                              <th scope="col">{{ col.heading }}</th>
+                          {% endfor %}
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for row in value.rows %}
+                          <tr>
+                              {% for block in row %}
+                                  <td>{% include_block block %}</td>
+                              {% endfor %}
+                          </tr>
+                      {% endfor %}
+                  </tbody>
+</table>

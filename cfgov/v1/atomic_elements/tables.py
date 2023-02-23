@@ -6,7 +6,11 @@ from wagtail.contrib.table_block.blocks import (
     TableInput,
     TableInputAdapter,
 )
+from wagtail.contrib.typed_table_block.blocks import TypedTableBlock
+from wagtail.core import blocks
 from wagtail.core.telepath import register
+
+from v1.blocks import HeadingBlock
 
 
 class RichTextTableInput(TableInput):
@@ -27,6 +31,9 @@ register(RichTextTableInputAdapter(), RichTextTableInput)
 
 
 class AtomicTableBlock(TableBlock):
+    label = "Table (deprecated)"
+    table_options = {"renderer": "html"}
+
     @cached_property
     def field(self):
         widget = RichTextTableInput(table_options=self.table_options)
@@ -69,4 +76,56 @@ class AtomicTableBlock(TableBlock):
         default = None
         icon = "table"
         template = "v1/includes/organisms/table.html"
+        label = "Table (deprecated)"
+
+
+class TableBlock(blocks.StructBlock):
+    heading = HeadingBlock()
+    column_width = blocks.ChoiceBlock(
+        choices=(
+            (c, c)
+            for c in (
+                ["Automatic"]
+                + [f"{percent}%" for percent in range(10, 100, 10)]
+            )
+        ),
+        default="Flexible width",
+    )
+    options = blocks.MultipleChoiceBlock(
+        choices=[
+            ("first_column_is_header", "Display the first column as a header"),
+            ("first_row_is_header", "Display the first row as a header"),
+            ("is_full_width", "Display the table at full width"),
+            ("is_striped", "Display the table with striped rows"),
+            ("is_stacked", "Stack the table columns on mobile"),
+        ],
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+    data = TypedTableBlock(
+        [
+            ("text", blocks.CharBlock()),
+            ("numeric", blocks.FloatBlock()),
+            (
+                "rich_text",
+                blocks.RichTextBlock(
+                    features=[
+                        "bold",
+                        "italic",
+                        "h3",
+                        "h4",
+                        "h5",
+                        "ol",
+                        "ul",
+                        "link",
+                        "document-link",
+                    ]
+                ),
+            ),
+        ]
+    )
+
+    class Meta:
+        icon = "table"
         label = "Table"
+        template = "v1/includes/organisms/table2.html"

@@ -21,7 +21,7 @@ from v1.atomic_elements import atoms, molecules
 
 # Bring AtomicTableBlock into this module to
 # maintain import structure across the project
-from v1.atomic_elements.tables import AtomicTableBlock
+from v1.atomic_elements.tables import AtomicTableBlock, TableBlock
 from v1.util import ref
 
 
@@ -578,6 +578,7 @@ class FullWidthText(blocks.StreamBlock):
     content_with_anchor = molecules.ContentWithAnchor()
     heading = v1_blocks.HeadingBlock(required=False)
     image = molecules.ContentImage()
+    table = TableBlock()
     table_block = AtomicTableBlock(table_options={"renderer": "html"})
     quote = molecules.Quote()
     cta = molecules.CallToAction()
