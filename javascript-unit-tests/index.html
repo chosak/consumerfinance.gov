@@ -1,154 +1,99 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  
-  <link rel="shortcut icon" href="../img/favicon.ico">
-  <title>JavaScript Unit Testing - consumerfinance.gov</title>
-  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
-
-  <link rel="stylesheet" href="../css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../css/theme_extra.css" type="text/css" />
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-  <link href="../css/overrides.css" rel="stylesheet">
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "JavaScript Unit Testing";
-    var mkdocs_page_input_path = "javascript-unit-tests.md";
-    var mkdocs_page_url = null;
-  </script>
-  
-  <script src="../js/jquery-2.1.1.min.js" defer></script>
-  <script src="../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script> 
-  
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>JavaScript Unit Testing - consumerfinance.gov</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../css/overrides.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "JavaScript Unit Testing";
+        var mkdocs_page_input_path = "javascript-unit-tests.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> consumerfinance.gov</a>
-        <div role="search">
+          <a href=".." class="icon icon-home"> consumerfinance.gov
+        </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-	<ul class="current">
-	  
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="..">Introduction</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <a class="" href="../installation/">Installation</a>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">Running this Project</span>
-    <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../running-virtualenv/">Running in a Virtual Environment</a>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
                 </li>
-                <li class="">
-                    
-    <a class="" href="../running-docker/">Running in Docker</a>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../installation/">Setup</a>
                 </li>
-                <li class="">
-                    
-    <a class="" href="../debugging-monitoring/">Debugging and Monitoring</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../deployment/">Artifacts and Deployment</a>
-                </li>
-    </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">Pages and Components</span>
-    <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../atomic-structure/">Atomic Structure and Design</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../editing-components/">Creating and Editing Components</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../debugging-templates/">Debugging Templates</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../migrations/">Django and Wagtail Migrations</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../forms-in-wagtail/">Forms in Wagtail Page Context</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../wagtail-pages/">Wagtail Pages</a>
-                </li>
-    </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">Supporting Features</span>
-    <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../caching/">Caching</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../feature-flags/">Feature Flags</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../filterable-lists/">Filterable Lists</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../search/">Search</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../translation/">Translation</a>
-                </li>
-    </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">Testing</span>
-    <ul class="subnav">
-                <li class=" current">
-                    
-    <a class="current" href="./">JavaScript Unit Testing</a>
-    <ul class="subnav">
-            
+              </ul>
+              <p class="caption"><span class="caption-text">Running this Project</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../running-virtualenv/">Running in a Virtual Environment</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../running-docker/">Running in Docker</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../running-docs/">Running documentation site locally</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../debugging-monitoring/">Debugging and Monitoring</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../deployment/">Artifacts and Deployment</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Pages and Components</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../atomic-structure/">Atomic Structure and Design</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../editing-components/">Creating and Editing Components</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../debugging-templates/">Debugging Templates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../migrations/">Django and Wagtail Migrations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../wagtail-pages/">Wagtail Pages</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Supporting Features</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../filterable-lists/">Filterable Lists</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Testing</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">JavaScript Unit Testing</a>
+    <ul class="current">
     
         <ul>
         
@@ -168,114 +113,63 @@
     
 
     </ul>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../python-unit-tests/">Python Unit Testing</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../functional-testing/">Functional Testing</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../profiling-django/">Profiling Django</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../other-front-end-testing/">Other Front-end Testing</a>
-                </li>
-    </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">Contributing</span>
-    <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../branching-merging/">Branching and Merging</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../contributing-docs/">Contributing to the Docs</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../related-projects/">Related Projects</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../development-tips/">Development Tips</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../github-actions/">How We Use GitHub Actions</a>
-                </li>
-    </ul>
-	    </li>
-          
-            <li class="toctree-l1">
-		
-    <span class="caption-text">APIs and Data</span>
-    <ul class="subnav">
-                <li class="">
-                    
-    <a class="" href="../ask-cfpb/">Ask CFPB</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../consumer-complaint-database/">Consumer Complaints</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../housing-counselor-tool/">Find a Housing Counselor Tool</a>
-                </li>
-                <li class="">
-                    
-    <a class="" href="../website-feedback/">Website Feedback</a>
-                </li>
-    </ul>
-	    </li>
-          
-        </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../python-unit-tests/">Python Unit Testing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../functional-testing/">Functional Testing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../profiling-django/">Profiling Django</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../other-front-end-testing/">Other Front-end Testing</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../branching-merging/">Branching and Merging</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../contributing-docs/">Contributing to the Docs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../related-projects/">Related Projects</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../development-tips/">Development Tips</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../github-actions/">How We Use GitHub Actions</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">APIs and Data</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ask-cfpb/">Ask CFPB</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../consumer-complaint-database/">Consumer Complaints</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../housing-counselor-tool/">Find a Housing Counselor Tool</a>
+                  </li>
+              </ul>
       </div>
-      &nbsp;
+    </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="..">consumerfinance.gov</a>
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">consumerfinance.gov</a>
+        
       </nav>
-
-      
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="..">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>Testing &raquo;</li>
-        
-      
-    
-    <li>JavaScript Unit Testing</li>
+    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+          <li>Testing &raquo;</li><li>JavaScript Unit Testing</li>
     <li class="wy-breadcrumbs-aside">
-      
         <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/javascript-unit-tests.md"
           class="icon icon-github"> Edit on GitHub</a>
-      
     </li>
   </ul>
   <hr/>
 </div>
-          <div role="main">
-            <div class="section">
+
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
               
                 <h1 id="javascript-unit-tests">JavaScript Unit Tests<a class="headerlink" href="#javascript-unit-tests" title="Permanent link">¶</a></h1>
 <p>This page provides instructions for writing and running
@@ -286,44 +180,43 @@ If you’re not familiar with it,
 it would be a good idea to peruse their docs before diving in here.</p>
 <h2 id="table-of-contents">Table of contents<a class="headerlink" href="#table-of-contents" title="Permanent link">¶</a></h2>
 <ol>
-<li><a href="#running-unit-tests">Running unit tests</a><ol>
+<li><a href="#running-unit-tests">Running unit tests</a></li>
 <li><a href="#running-a-single-test-file">Running a single test file</a></li>
 <li><a href="#run-a-directory-of-unit-tests">Run a directory of unit tests</a></li>
 <li><a href="#run-all-unit-tests">Run all unit tests</a></li>
-</ol>
-</li>
 <li><a href="#where-to-find-tests">Where to find tests</a></li>
 <li><a href="#test-driven-development">Test-driven development</a></li>
-<li><a href="#setting-up-tests">Setting up tests</a><ol>
+<li><a href="#setting-up-tests">Setting up tests</a></li>
 <li><a href="#new-test-file-from-sample">New test file from sample</a></li>
 <li><a href="#folder-structure-where-to-put-your-javascript-and-tests">Folder structure (where to put your JavaScript and tests)</a></li>
 <li><a href="#first-test-run">First test run</a></li>
 <li><a href="#file-structure-basic-layout-of-a-test-file">File structure (basic layout of a test file)</a></li>
 <li><a href="#providing-test-data">Providing test data</a></li>
-</ol>
-</li>
-<li><a href="#common-test-patterns">Common test patterns</a><ol>
+<li><a href="#common-test-patterns">Common test patterns</a></li>
 <li><a href="#testing-a-basic-function">Testing a basic function</a></li>
 <li><a href="#testing-dom-manipulation">Testing DOM manipulation</a></li>
 <li><a href="#testing-browser-state">Testing browser state</a></li>
 <li><a href="#testing-user-interaction">Testing user interaction</a></li>
 </ol>
-</li>
-</ol>
 <h2 id="running-unit-tests">Running unit tests<a class="headerlink" href="#running-unit-tests" title="Permanent link">¶</a></h2>
 <h3 id="run-a-single-test-file">Run a single test file<a class="headerlink" href="#run-a-single-test-file" title="Permanent link">¶</a></h3>
-<p>To run a single test file, use the <code>--specs</code> flag to specify a file path:</p>
-<pre class="highlight"><code class="language-bash">gulp test:unit --specs=js/organisms/Footer-spec.js</code></pre>
-
-<p>The above command tests the code at <code>cfgov/unprocessed/js/organisms/Footer.js</code>.</p>
+<p>To run a single test file, pass the name (or path) of the spec:</p>
+<pre class="highlight"><code class="language-bash">yarn jest Notification-spec.js
+# Equivalent to:
+yarn jest test/unit_tests/js/molecules/Notification-spec.js
+# The name argument would technically would match all Notification-spec.js files
+# This usually isn't a problem in our codebase (and you can always get more specific if needed)</code></pre>
 <h3 id="run-a-directory-of-unit-tests">Run a directory of unit tests<a class="headerlink" href="#run-a-directory-of-unit-tests" title="Permanent link">¶</a></h3>
-<p>A directory of unit tests can be run with:</p>
-<pre class="highlight"><code class="language-bash">gulp test:unit --specs=js/molecules/</code></pre>
-
+<p>A directory of unit tests can be run by passing its name or path:</p>
+<pre class="highlight"><code class="language-bash">yarn jest organisms
+yarn jest test/unit_tests/js/organisms</code></pre>
 <h3 id="run-all-unit-tests">Run all unit tests<a class="headerlink" href="#run-all-unit-tests" title="Permanent link">¶</a></h3>
 <p>To run all of the unit tests:</p>
-<pre class="highlight"><code class="language-bash">gulp test:unit</code></pre>
-
+<pre class="highlight"><code class="language-bash">yarn jest</code></pre>
+<p>To first lint all files and then run tests:</p>
+<pre class="highlight"><code class="language-bash">yarn test</code></pre>
+<p>Because we invoke jest directly, you can pass any command-line args it accepts
+to filter your output or to target specific tests <a href="https://jestjs.io/docs/cli">see the docs for more</a>.</p>
 <h2 id="where-to-find-tests">Where to find tests<a class="headerlink" href="#where-to-find-tests" title="Permanent link">¶</a></h2>
 <p>The following links list out the main directories containing tests
 (as of January 2019, this page’s initial publication date).</p>
@@ -365,18 +258,14 @@ For links to existing tests,
 <p>Now, let’s begin! Let’s make a new unit test fail,
 then we will make it pass, following the principles of TDD.</p>
 <ol>
-<li>
-<p>Copy the sample test file to a new location by
-   running this command from the root of consumerfinance.gov:</p>
-<pre class="highlight"><code class="language-bash">cp docs/samples/sample-spec.js test/unit_tests/js/modules/</code></pre>
-
-</li>
-<li>
-<p>Copy the sample module file to a new location by running this command:</p>
-<pre class="highlight"><code class="language-bash">cp docs/samples/sample.js cfgov/unprocessed/js/modules/</code></pre>
-
-</li>
+<li>Copy the sample test file to a new location by
+   running this command from the root of consumerfinance.gov:</li>
 </ol>
+<pre class="highlight"><code class="language-bash">cp docs/samples/sample-spec.js test/unit_tests/js/modules/</code></pre>
+<ol>
+<li>Copy the sample module file to a new location by running this command:</li>
+</ol>
+<pre class="highlight"><code class="language-bash">cp docs/samples/sample.js cfgov/unprocessed/js/modules/</code></pre>
 <p>Test file names should always match what they are testing,
 with the addition of a <code>-spec</code> suffix.</p>
 <h3 id="folder-structure-where-to-put-your-javascript-and-tests">Folder structure (where to put your JavaScript and tests)<a class="headerlink" href="#folder-structure-where-to-put-your-javascript-and-tests" title="Permanent link">¶</a></h3>
@@ -396,12 +285,12 @@ so they can be placed into the uncategorized <code>modules</code> subfolders:
 <code>cfgov/unprocessed/js/modules</code> and <code>test/unit_tests/modules</code>, respectively.</p>
 <div class="admonition note">
 <p class="admonition-title">Child apps</p>
+</div>
 <p>If you’re working on something in a child app,
 put it in <code>test/unit_test/appname/js/</code>.
 Otherwise, if you’re working on something that
 belongs to consumerfinance.gov generally,
 it should go in the corresponding folder under <code>test/unit_test/js/</code>.</p>
-</div>
 <h3 id="first-test-run">First test run<a class="headerlink" href="#first-test-run" title="Permanent link">¶</a></h3>
 <p>Now that you have your sample JS and test files in the right places,
 let’s try running them and see what happens!
@@ -409,39 +298,34 @@ I’ll refer to <code>sample-spec.js</code> and <code>sample.js</code> in the in
 but you should work in your own new test file and JavaScript file
 to save and commit your changes.</p>
 <ol>
-<li>
-<p>Edit line 6 of your spec file and remove the call to the <code>.skip</code> method.
-   The line should now read:</p>
+<li>Edit line 6 of your spec file and remove the call to the <code>.skip</code> method.
+   The line should now read:</li>
+</ol>
 <pre class="highlight"><code class="language-js">it( 'should return a string with expected value', () =&gt; {
   …
 } );</code></pre>
-
-</li>
-<li>
-<p>Run your sample test using</p>
-<pre class="highlight"><code class="language-bash">gulp test:unit --specs=js/modules/sample-spec.js</code></pre>
-
+<ol>
+<li>Run your sample test using</li>
+</ol>
+<pre class="highlight"><code class="language-bash">yarn jest sample-spec.js</code></pre>
 <p>(substituting your own filename).</p>
 <p>You should see output like this:</p>
 <p><img alt="Console output for failing unit test: &quot;sample should return a string with expected value&quot;" src="../img/js-unit-test-output-fail.png" /></p>
 <p>The test should fail – this is expected.
-Remember, when doing TDD, we want to write our test to fail first,
-then write the corresponding JavaScript that will make the test pass.</p>
-</li>
-<li>
-<p>Make the test pass by changing your script’s line 7
+   Remember, when doing TDD, we want to write our test to fail first,
+   then write the corresponding JavaScript that will make the test pass.</p>
+<ol>
+<li>Make the test pass by changing your script’s line 7
    (<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/unprocessed/js/modules/sample.js">see <code>sample.js</code></a>)
-   to the following:</p>
+   to the following:</li>
+</ol>
 <pre class="highlight"><code class="language-js">return 'Shredder';</code></pre>
-
-</li>
-<li>
-<p>Run the test again to confirm the test now passes.
-   You should see output like this:</p>
+<ol>
+<li>Run the test again to confirm the test now passes.
+   You should see output like this:</li>
+</ol>
 <p><img alt="Console output for passing unit test: &quot;PASS test/unit_tests/js/modules/sample-spec.js&quot;" src="../img/js-unit-test-output-pass.png" /></p>
 <p>Doesn’t it feel good?</p>
-</li>
-</ol>
 <p><a href="#running-unit-tests">Refer back to the “Running unit tests” section</a>
 for additional commands to run tests.</p>
 <h3 id="file-structure-basic-layout-of-a-test-file">File structure (basic layout of a test file)<a class="headerlink" href="#file-structure-basic-layout-of-a-test-file" title="Permanent link">¶</a></h3>
@@ -453,12 +337,10 @@ Let’s take a look at the structure of our very basic sample test file.</p>
 include the JavaScript file that you are testing.
 Additional dependencies should be added in the same manner.</p>
 <pre class="highlight"><code class="language-js">import sample from '../../../../cfgov/unprocessed/js/modules/sample.js';</code></pre>
-
 <p>Some test files use <code>const</code> declarations to
 <code>require</code> scripts instead of <code>import</code>,
 because those files were written before <code>import</code> was available.
-We prefer to use <code>import</code> because it allows for
-<a href="https://webpack.js.org/guides/tree-shaking/">tree shaking in Webpack</a>,
+We prefer to use <code>import</code> because it allows for tree shaking,
 meaning if two modules are importing the same module
 it should only be included in the bundle once,
 whereas with <code>require</code> it would be included twice.</p>
@@ -475,7 +357,6 @@ import * as FooterButton from BASE_JS_PATH + 'modules/footer-button.js';
 
 // This is ugly, but it works and supports tree shaking.
 import * as FooterButton from '../../../../cfgov/unprocessed/js/modules/footer-button.js';</code></pre>
-
 <p><code>import</code> also provides a benefit in that you can choose specific parts
 of a module so that you only import the dependencies you need.
 For testing purposes, we will typically import the whole module
@@ -494,7 +375,6 @@ so we set this up on line 4 of <code>sample-spec.js</code>:</p>
 <pre class="highlight"><code class="language-js">describe( 'sample', () =&gt; {
   …
 } );</code></pre>
-
 <p>This module name will appear in your test output in the console
 when the test is running:</p>
 <p><img alt="Snippet of console output for a unit test that reads 'sample: should return a string with expected value'" src="../img/js-unit-test-output-with-describes.png" /></p>
@@ -503,31 +383,25 @@ children of the root <code>describe</code> block –
 that should correspond to a particular method in the module.
 For example, if we want to add more functionality to our sample JS,
 we could start by writing these tests in <code>sample-spec.js</code>:</p>
-<pre class="highlight"><code class="language-js">describe( 'sample', () =&gt; {
-
-  describe( 'gimmeString()', () =&gt; {
-
-    it( 'should return a string with expected value', () =&gt; {
+<pre class="highlight"><code class="language-js">describe('sample', () =&gt; {
+  describe('gimmeString()', () =&gt; {
+    it('should return a string with expected value', () =&gt; {
       const sampleString = 'Shredder';
-      expect( sample.gimmeString() ).toBe( sampleString );
-    } );
+      expect(sample.gimmeString()).toBe(sampleString);
+    });
+  });
 
-  } );
-
-  describe( 'gimmeObject()', () =&gt; {
-
-    it( 'should return an object with expected value', () =&gt; {
+  describe('gimmeObject()', () =&gt; {
+    it('should return an object with expected value', () =&gt; {
       const sampleObject = {
-        image: 'https://vignette.wikia.nocookie.net/tmnt/images/0/00/Krangnobody.png',
-        caption: 'Krang portrait'
+        image:
+          'https://vignette.wikia.nocookie.net/tmnt/images/0/00/Krangnobody.png',
+        caption: 'Krang portrait',
       };
-      expect( sample.gimmeObject() ).toBe( sampleObject );
-    } );
-
-  } );
-
-} );</code></pre>
-
+      expect(sample.gimmeObject()).toBe(sampleObject);
+    });
+  });
+});</code></pre>
 <p>(We’ll talk more about writing the individual tests in the next section.)</p>
 <p>And then we would create the <code>gimmeString</code> and <code>gimmeObject</code> methods
 in our <code>sample.js</code> file.</p>
@@ -545,34 +419,27 @@ which is an alias of
 that confirm that the result of executing some code is what you expected.
 These are called <a href="https://jestjs.io/docs/en/using-matchers">“matchers”</a>
 in Jest parlance, and they all follow this format:</p>
-<pre class="highlight"><code class="language-js">expect( someValue ).someKindOfComparisonWith( someOtherValue );</code></pre>
-
+<pre class="highlight"><code class="language-js">expect(someValue).someKindOfComparisonWith(someOtherValue);</code></pre>
 <p>For example, let’s take another look at the sample tests we wrote above:</p>
-<pre class="highlight"><code class="language-js">describe( 'sample', () =&gt; {
-
-  describe( 'gimmeString()', () =&gt; {
-
-    it( 'should return a string with expected value', () =&gt; {
+<pre class="highlight"><code class="language-js">describe('sample', () =&gt; {
+  describe('gimmeString()', () =&gt; {
+    it('should return a string with expected value', () =&gt; {
       const sampleString = 'Shredder';
-      expect( sample.gimmeString() ).toBe( sampleString );
-    } );
+      expect(sample.gimmeString()).toBe(sampleString);
+    });
+  });
 
-  } );
-
-  describe( 'gimmeObject()', () =&gt; {
-
-    it( 'should return an object with expected value', () =&gt; {
+  describe('gimmeObject()', () =&gt; {
+    it('should return an object with expected value', () =&gt; {
       const sampleObject = {
-        image: 'https://vignette.wikia.nocookie.net/tmnt/images/0/00/Krangnobody.png',
-        caption: 'Krang portrait'
+        image:
+          'https://vignette.wikia.nocookie.net/tmnt/images/0/00/Krangnobody.png',
+        caption: 'Krang portrait',
       };
-      expect( sample.gimmeObject() ).toBe( sampleObject );
-    } );
-
-  } );
-
-} );</code></pre>
-
+      expect(sample.gimmeObject()).toBe(sampleObject);
+    });
+  });
+});</code></pre>
 <p>In these tests, we check <em>(<code>expect</code>)</em> that
 the string returned by <code>sample.gimmeString()</code>
 and the object returned by <code>sample.gimmeObject()</code>
@@ -632,54 +499,45 @@ and use <code>expect</code> to check that you receive the desired result.</p>
 <p>Here is a simple example from our
 <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/unprocessed/js/modules/util/array-helpers.js">array helpers module</a>
 (<code>cfgov/unprocessed/js/modules/util/array-helpers.js</code>):</p>
-<pre class="highlight"><code class="language-js">function indexOfObject( array, key, val ) {
+<pre class="highlight"><code class="language-js">function indexOfObject(array, key, val) {
   let match = -1;
 
-  if ( !array.length &gt; 0 ) {
+  if (!array.length &gt; 0) {
     return match;
   }
 
-  array.forEach( function( item, index ) {
-    if ( item[key] === val ) {
+  array.forEach(function (item, index) {
+    if (item[key] === val) {
       match = index;
     }
-  } );
+  });
 
   return match;
 }</code></pre>
-
 <p>Tests for that function, from
 <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/test/unit_tests/js/modules/util/array-helpers-spec.js">test/unit_tests/js/modules/util/array-helpers-spec.js</a>:</p>
-<pre class="highlight"><code class="language-js">describe( 'indexOfObject()', () =&gt; {
-  it( 'should return -1 if the array is empty', () =&gt; {
+<pre class="highlight"><code class="language-js">describe('indexOfObject()', () =&gt; {
+  it('should return -1 if the array is empty', () =&gt; {
     array = [];
-    index = arrayHelpers.indexOfObject( array, 'foo' );
+    index = arrayHelpers.indexOfObject(array, 'foo');
 
-    expect( index ).toBe( -1 );
-  } );
+    expect(index).toBe(-1);
+  });
 
-  it( 'should return -1 if there is no match', () =&gt; {
-    array = [
-      { value: 'bar' },
-      { value: 'baz' }
-    ];
-    index = arrayHelpers.indexOfObject( array, 'value', 'foo' );
+  it('should return -1 if there is no match', () =&gt; {
+    array = [{ value: 'bar' }, { value: 'baz' }];
+    index = arrayHelpers.indexOfObject(array, 'value', 'foo');
 
-    expect( index ).toBe( -1 );
-  } );
+    expect(index).toBe(-1);
+  });
 
-  it( 'should return the matched index', () =&gt; {
-    array = [
-      { value: 'foo' },
-      { value: 'bar' },
-      { value: 'baz' }
-    ];
-    index = arrayHelpers.indexOfObject( array, 'value', 'foo' );
+  it('should return the matched index', () =&gt; {
+    array = [{ value: 'foo' }, { value: 'bar' }, { value: 'baz' }];
+    index = arrayHelpers.indexOfObject(array, 'value', 'foo');
 
-    expect( index ).toBe( 0 );
-  } );
-} );</code></pre>
-
+    expect(index).toBe(0);
+  });
+});</code></pre>
 <h3 id="testing-dom-manipulation">Testing DOM manipulation<a class="headerlink" href="#testing-dom-manipulation" title="Permanent link">¶</a></h3>
 <p><a href="https://jestjs.io/en/">Jest</a>, the JavaScript testing framework we use,
 <a href="https://jestjs.io/docs/en/configuration#testenvironment-string">includes jsdom</a>,
@@ -694,36 +552,32 @@ with different classes and SVG icon code to style it
 as a particular kind of notification (success, warning, etc.). In
 <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/unprocessed/js/molecules/Notification.js">the component JS</a>,
 we have this function that sets the type of a notification before displaying it:</p>
-<pre class="highlight"><code class="language-js">function _setType( type ) {
+<pre class="highlight"><code class="language-js">function _setType(type) {
   // If type hasn't changed, return.
-  if ( _currentType === type ) {
+  if (_currentType === type) {
     return this;
   }
 
   // Remove existing type class
   const classList = _dom.classList;
-  classList.remove(  `${ BASE_CLASS }__${ _currentType }` );
+  classList.remove(`${BASE_CLASS}__${_currentType}`);
 
-
-  if ( type === SUCCESS ||
-       type === WARNING ||
-       type === ERROR ) {
+  if (type === SUCCESS || type === WARNING || type === ERROR) {
     // Add new type class and update the value of _currentType
-    classList.add(  `${ BASE_CLASS }__${ type }` );
+    classList.add(`${BASE_CLASS}__${type}`);
     _currentType = type;
 
     // Replace &lt;svg&gt; element with contents of type_ICON
-    const currentIcon = _dom.querySelector( '.cf-icon-svg' );
-    const newIconSetup = document.createElement( 'div' );
+    const currentIcon = _dom.querySelector('.cf-icon-svg');
+    const newIconSetup = document.createElement('div');
     newIconSetup.innerHTML = ICON[type];
     const newIcon = newIconSetup.firstChild;
-    _dom.replaceChild( newIcon, currentIcon );
+    _dom.replaceChild(newIcon, currentIcon);
   } else {
-    throw new Error( `${ type } is not a supported notification type!` );
+    throw new Error(`${type} is not a supported notification type!`);
   }
   return this;
 }</code></pre>
-
 <p>This function would be invoked by an instance of the Notification class.
 <code>_dom</code> is the DOM node for the Notification.
 As you can see from the code comments above,
@@ -735,10 +589,10 @@ that tests this component:</p>
 <pre class="highlight"><code class="language-js">import Notification from '../../../../cfgov/unprocessed/js/molecules/Notification';
 const BASE_CLASS = 'm-notification';
 const HTML_SNIPPET = `
-  &lt;div class=&quot;m-notification&quot;&gt;
-    &lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 1000 1200&quot; class=&quot;cf-icon-svg&quot;&gt;&lt;/svg&gt;
-    &lt;div class=&quot;m-notification_content&quot;&gt;
-      &lt;div class=&quot;h4 m-notification_message&quot;&gt;Notification content&lt;/div&gt;
+  &lt;div class="m-notification"&gt;
+    &lt;svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1200" class="cf-icon-svg"&gt;&lt;/svg&gt;
+    &lt;div class="m-notification_content"&gt;
+      &lt;div class="h4 m-notification_message"&gt;Notification content&lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
 `;
@@ -756,7 +610,6 @@ describe( 'Notification', () =&gt; {
 
   …
 } );</code></pre>
-
 <p>The main things to note here at the beginning of the file are
 the addition of the <code>HTML_SNIPPET</code> definition,
 containing the markup we will used for testing
@@ -767,6 +620,7 @@ and assigns the component node to the <code>notificationElem</code> variable, an
 (2) creates a new instance of the Notification class.</p>
 <div class="admonition note">
 <p class="admonition-title">A word about <code>HTML_SNIPPET</code>s</p>
+</div>
 <p>Right now it’s possible to update a component’s Jinja template,
 forget to update the corresponding JavaScript,
 and the unit tests would still pass,
@@ -779,7 +633,6 @@ the tests would have to reconcile
 into a complete, finished chunk of markup.
 For now, just be aware of this when
 <a href="../editing-components/">editing a Wagtail component that includes JavaScript</a>.</p>
-</div>
 <p>Further down, here are some of the tests that cover the <code>_setType</code> function
 (by way of the <code>setTypeAndContent</code> function that
 wraps both <code>_setType</code> and <code>_setContent</code>):</p>
@@ -808,7 +661,6 @@ wraps both <code>_setType</code> and <code>_setContent</code>):</p>
 
   …
 } );</code></pre>
-
 <p>This part mostly works like testing any other function.
 The notable distinction here is that the test invokes the function
 using the DOM nodes and class set up in <code>beforeEach</code>.</p>
@@ -820,56 +672,7 @@ the window object; session storage; page history; etc.</p>
 <p>One way of doing this is to create a <strong>spy</strong>
 (a special kind of mocked function)
 that watches for browser API calls to be made
-a certain number of times or with a specific payload.
-One example is found in
-<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/test/unit_tests/js/modules/o-table-row-links-spec.js">the tests for our full-table-row-linking code</a>.</p>
-<p>In
-<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/unprocessed/js/modules/o-table-row-links.js">the module code</a>
-(<code>o-table-row-links.js</code>),
-if an event listener detects a click anywhere on
-one of these special table rows,
-it invokes <code>window.location</code> to send the browser
-to the <code>href</code> of the first link in that row:</p>
-<pre class="highlight"><code class="language-js">window.location.assign( target.querySelector( 'a' ).getAttribute( 'href' ) );</code></pre>
-
-<p>To test this, in the aforementioned <code>o-table-row-links-spec.js</code> file, we first
-<a href="https://jestjs.io/docs/en/mock-functions">set up a standard Jest mock</a>
-for <code>window.location.assign</code>, and then
-<a href="https://jestjs.io/docs/en/jest-object#jestspyonobject-methodname">create our spy</a>
-to watch it:</p>
-<pre class="highlight"><code class="language-js">describe( 'o-table-row-links', () =&gt; {
-  beforeEach( () =&gt; {
-    window.location.assign = jest.fn();
-    locationSpy = jest.spyOn( window.location, 'assign' );
-    …
-  } );
-
-  …
-} );</code></pre>
-
-<p>A little further down (after finishing the DOM setup
-and initializing the module we’re testing),
-we have three tests that simulate clicks
-and then assert things that the spy can answer for us:
-whether it was called with a particular location parameter,
-and that it was called a specific number of times (zero).</p>
-<pre class="highlight"><code class="language-js">it( 'should navigate to new location when link row cell clicked', () =&gt; {
-  simulateEvent( 'click', linkRowCellDom );
-  expect( locationSpy ).toBeCalledWith( 'https://www.example.com' );
-} );
-
-it( 'should not set window location when link is clicked', () =&gt; {
-  simulateEvent( 'click', linkDom );
-  expect( locationSpy ).toHaveBeenCalledTimes( 0 );
-} );
-
-it( 'should not navigate to new location when non link row cell clicked',
-  () =&gt; {
-    simulateEvent( 'click', nonLinkRowCellDom );
-    expect( locationSpy ).toHaveBeenCalledTimes( 0 );
-  }
-);</code></pre>
-
+a certain number of times or with a specific payload.</p>
 <h3 id="testing-user-interaction">Testing user interaction<a class="headerlink" href="#testing-user-interaction" title="Permanent link">¶</a></h3>
 <p>Testing user interaction with simulated pointer events, keystrokes,
 or form submissions is best handled via browser tests, not unit tests.
@@ -878,29 +681,21 @@ if the component wasn’t visible on the page, for instance.
 <a href="../functional-testing/">Read more about how we run browser tests with Cypress.</a></p>
               
             </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../translation/" class="btn btn-neutral float-left" title="Translation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../python-unit-tests/" class="btn btn-neutral float-right" title="Python Unit Testing">Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../translation/" class="btn btn-neutral" title="Translation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-    
   </div>
 
-  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
-      
+          
         </div>
       </div>
 
@@ -908,22 +703,30 @@ if the component wasn’t visible on the page, for instance.
 
   </div>
 
-  <div class="rst-versions" role="note" style="cursor: pointer">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-          <a href="https://github.com/cfpb/consumerfinance.gov/" class="fa fa-github" style="float: left; color: #fcfcfc"> GitHub</a>
-      
-      
-        <span><a href="../translation/" style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-        <span style="margin-left: 15px"><a href="../python-unit-tests/" style="color: #fcfcfc">Next &raquo;</a></span>
-      
-    </span>
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/cfpb/consumerfinance.gov" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../translation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../python-unit-tests/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
 </div>
     <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
     <script src="../js/theme.js" defer></script>
       <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
 
 </body>
 </html>
