@@ -3,18 +3,15 @@ from operator import itemgetter
 
 from django import forms
 from django.conf import settings
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.forms import widgets
 
 from wagtail.images.forms import BaseImageForm
 
-from dateutil import parser
 from taggit.models import Tag
 
 from v1.models import enforcement_action_page
 from v1.util import ERROR_MESSAGES, ref
-from v1.util.categories import clean_categories
 from v1.util.datetimes import end_of_time_period
 
 
@@ -66,6 +63,8 @@ class FilterableDateField(forms.DateField):
 
 
 class FilterableListForm(forms.Form):
+    model_class = forms.CharField(required=False, widget=forms.HiddenInput())
+
     title = forms.CharField(
         max_length=250,
         required=False,
@@ -76,6 +75,7 @@ class FilterableListForm(forms.Form):
             }
         ),
     )
+
     from_date = FilterableDateField(
         field_id="o-filterable-list-controls_from-date"
     )
@@ -123,137 +123,62 @@ class FilterableListForm(forms.Form):
         ),
     )
 
+    statuses = forms.MultipleChoiceField(
+        required=False,
+        choices=enforcement_action_page.enforcement_statuses,
+        widget=widgets.SelectMultiple(
+            attrs={
+                "id": "o-filterable-list-controls_statuses",
+                "class": "o-multiselect",
+                "data-placeholder": "Search for statuses",
+                "multiple": "multiple",
+            }
+        ),
+    )
+
+    products = forms.MultipleChoiceField(
+        required=False,
+        choices=enforcement_action_page.enforcement_products,
+        widget=widgets.SelectMultiple(
+            attrs={
+                "id": "o-filterable-list-controls_products",
+                "class": "o-multiselect",
+                "data-placeholder": "Search for products",
+                "multiple": "multiple",
+            }
+        ),
+    )
+
     preferred_datetime_format = "%Y-%m-%d"
 
     def __init__(self, *args, **kwargs):
-        self.filterable_search = kwargs.pop("filterable_search")
-        self.filterable_categories = kwargs.pop("filterable_categories")
+        self.default_min_date = kwargs.pop("default_min_date")
 
-        # This cache key is used for caching the topics, page_ids,
-        # and the full set of Elasticsearch results for this form used to
-        # generate them.
-        # Default the cache key prefix to this form's hash if it's not
-        # provided.
-        self.cache_key_prefix = kwargs.pop("cache_key_prefix", hash(self))
+        topic_choices = self.get_topic_choices(kwargs.pop("topic_slugs"))
+        language_choices = self.get_language_choices(
+            kwargs.pop("language_codes")
+        )
 
         super().__init__(*args, **kwargs)
 
-        clean_categories(selected_categories=self.data.get("categories"))
+        self.fields["topics"].choices = topic_choices
+        self.fields["language"].choices = language_choices
 
-        self.all_filterable_results = self.get_all_filterable_results()
-        page_ids = self.get_all_page_ids()
-        self.set_topics(page_ids)
-        self.set_languages()
-
-    def get_all_filterable_results(self):
-        """Get all filterable document results from Elasticsearch
-
-        This set of results is used to populate the list of all page_ids,
-        below, which is in turn used for populating the topics
-        relevant to those pages.
-
-        This first document in this result set is also used to determine the
-        earliest post date, also below, when a to_date is given but
-        from_date is not.
-        """
-        # Cache the full list of filterable results. This avoids having to
-        # generate the same list with every request. When a filterable page is
-        # is saved, the cache key for this fix prefix will be deleted.
-        all_filterable_results = cache.get(
-            f"{self.cache_key_prefix}-all_filterable_results"
-        )
-        if all_filterable_results is None:
-            all_filterable_results = self.filterable_search.get_raw_results()
-            cache.set(
-                f"{self.cache_key_prefix}-all_filterable_results",
-                all_filterable_results,
-            )
-        return all_filterable_results
-
-    def get_all_page_ids(self):
-        """Return a list of all possible filterable page ids"""
-        page_ids = cache.get(f"{self.cache_key_prefix}-page_ids")
-        if page_ids is None:
-            page_ids = [
-                result.meta.id for result in self.all_filterable_results
-            ]
-            cache.set(f"{self.cache_key_prefix}-page_ids", page_ids)
-        return page_ids
-
-    def get_categories(self):
-        categories = self.cleaned_data.get("categories")
-
-        # If no categories are submitted by the form
-        if categories == []:
-            # And we have defined a prexisting set of categories
-            # to limit results by Using CategoryFilterableMixin
-            if self.filterable_categories not in ([], None):
-                return ref.get_category_children(self.filterable_categories)
-        return categories
-
-    def get_page_set(self):
-        categories = self.get_categories()
-
-        self.filterable_search.filter(
-            topics=self.cleaned_data.get("topics"),
-            categories=categories,
-            language=self.cleaned_data.get("language"),
-            to_date=self.cleaned_data.get("to_date"),
-            from_date=self.cleaned_data.get("from_date"),
+    def get_topic_choices(self, topic_slugs):
+        return (
+            Tag.objects.filter(slug__in=topic_slugs)
+            .values_list("slug", "name")
+            .order_by("name")
         )
 
-        results = self.filterable_search.search(self.cleaned_data.get("title"))
-
-        return results
-
-    def first_page_date(self):
-        if not self.all_filterable_results:
-            return date(2010, 1, 1)
-
-        min_start_date = parser.parse(
-            self.all_filterable_results.aggregations.min_start_date.value_as_string
-        )
-
-        return min_start_date.date()
-
-    @staticmethod
-    def get_filterable_topics(page_ids):
-        """Given a set of page IDs, return the list of filterable topics"""
-        tags = Tag.objects.filter(
-            v1_cfgovtaggedpages_items__content_object__id__in=page_ids
-        ).values_list("slug", "name")
-
-        return tags.distinct().order_by("name")
-
-    def set_topics(self, page_ids):
-        # Cache the topics for this filterable list form to avoid
-        # repeated database lookups of the same data.
-        topics = cache.get(f"{self.cache_key_prefix}-topics")
-        if not topics:
-            topics = self.get_filterable_topics(page_ids)
-            cache.set(f"{self.cache_key_prefix}-topics", topics)
-
-        self.fields["topics"].choices = topics
-
-    # Populate language choices
-    def set_languages(self):
-        # Get the list of codes in the full set of searchable pages.
-        language_aggregation = (
-            self.all_filterable_results.aggregations.languages
-        )
-        language_codes = {b.key for b in language_aggregation.buckets}
-
-        # Grab the language names from the reference list.
-        language_options = [
+    def get_language_choices(self, language_codes):
+        languages = [
             (code, name)
             for code, name in settings.LANGUAGES
             if code in language_codes
         ]
 
-        # Sort the list of languages by their names.
-        self.fields["language"].choices = sorted(
-            language_options, key=itemgetter(1)
-        )
+        return sorted(languages, key=itemgetter(1))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -295,11 +220,10 @@ class FilterableListForm(forms.Form):
                 )
             else:
                 # If there's a 'to_date' and no 'from_date',
-                #  use date of earliest possible filter result as 'from_date'.
-                earliest_results = self.first_page_date()
-                cleaned_data["from_date"] = earliest_results
+                #  use default_min_date as 'from_date'.
+                cleaned_data["from_date"] = self.default_min_date
                 self.data["from_date"] = date.strftime(
-                    earliest_results, self.preferred_datetime_format
+                    self.default_min_date, self.preferred_datetime_format
                 )
 
             if to_date:
@@ -320,74 +244,27 @@ class FilterableListForm(forms.Form):
 
         return cleaned_data
 
-    # Sets the html name by replacing the render method to use the given name.
-    def set_field_html_name(self, field, new_name):
+    @property
+    def do_not_index(self):
+        """Whether the results from this form should be indexed by crawlers.
+
+        Do not index queries unless they consist of a single topic field.
+        This means that we don't index if all of these are true:
+
+        - the form is bound (some data was submitted)
+        - the only filter that was applied was the "topics" filter
+        - only a single topic filter was provided
         """
-        This creates wrapper around the normal widget rendering,
-        allowing for a custom field name (new_name).
-        """
-        old_render = field.widget.render
-        field.widget.render = lambda name, value, **kwargs: old_render(
-            new_name, value, **kwargs
+        return (
+            self.is_bound
+            and list(self.data.keys()) == ["topics"]
+            and len(self.data["topics"]) == 1
         )
 
-
-class EnforcementActionsFilterForm(FilterableListForm):
-    statuses = forms.MultipleChoiceField(
-        required=False,
-        choices=enforcement_action_page.enforcement_statuses,
-        widget=widgets.SelectMultiple(
-            attrs={
-                "id": "o-filterable-list-controls_statuses",
-                "class": "o-multiselect",
-                "data-placeholder": "Search for statuses",
-                "multiple": "multiple",
-            }
-        ),
-    )
-
-    products = forms.MultipleChoiceField(
-        required=False,
-        choices=enforcement_action_page.enforcement_products,
-        widget=widgets.SelectMultiple(
-            attrs={
-                "id": "o-filterable-list-controls_products",
-                "class": "o-multiselect",
-                "data-placeholder": "Search for products",
-                "multiple": "multiple",
-            }
-        ),
-    )
-
-    def get_page_set(self):
-        self.filterable_search.filter(
-            topics=self.cleaned_data.get("topics"),
-            categories=self.cleaned_data.get("categories"),
-            language=self.cleaned_data.get("language"),
-            to_date=self.cleaned_data.get("to_date"),
-            from_date=self.cleaned_data.get("from_date"),
-            statuses=self.cleaned_data.get("statuses"),
-            products=self.cleaned_data.get("products"),
-        )
-        results = self.filterable_search.search(
-            title=self.cleaned_data.get("title"),
-        )
-        return results
-
-
-class EventArchiveFilterForm(FilterableListForm):
-    def get_page_set(self):
-        self.filterable_search.filter(
-            topics=self.cleaned_data.get("topics"),
-            categories=self.cleaned_data.get("categories"),
-            language=self.cleaned_data.get("language"),
-            to_date=self.cleaned_data.get("to_date"),
-            from_date=self.cleaned_data.get("from_date"),
-        )
-        results = self.filterable_search.search(
-            title=self.cleaned_data.get("title")
-        )
-        return results
+    @property
+    def has_active_filters(self):
+        """Whether this form is being actively filtered by a query."""
+        return self.is_bound and any(self.data.values())
 
 
 class CFGOVImageForm(BaseImageForm):

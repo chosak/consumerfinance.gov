@@ -1,145 +1,157 @@
-import datetime
-from unittest import mock
+from datetime import date
 
 from django import forms
-from django.test import TestCase
+from django.core.exceptions import ValidationError
+from django.test import SimpleTestCase, TestCase
+from django.utils.text import slugify
 
 from wagtail.images.forms import get_image_form
 
 from freezegun import freeze_time
+from taggit.models import Tag
 
 from v1.forms import FilterableDateField, FilterableListForm
 from v1.models import CFGOVImage
 
 
-class TestFilterableListForm(TestCase):
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    def test_clean_returns_cleaned_data_if_in_future(
-        self, mock_super, mock_init
-    ):
-        mock_init.return_value = None
-        from_date = datetime.date(2048, 1, 23)
-        to_date = from_date + datetime.timedelta(weeks=52)
-        form_data = {"from_date": from_date, "to_date": to_date}
+def make_filterable_list_form(**kwargs):
+    data = {
+        "default_min_date": date(2020, 1, 1),
+        "topic_slugs": [],
+        "language_codes": [],
+    }
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {"from_date": "1/23/2048", "to_date": "1/23/2049"}
-        form._errors = {}
+    data.update(**kwargs)
 
-        result = form.clean()
-        assert result["from_date"] == from_date
-        assert result["to_date"] == to_date
+    return FilterableListForm(**data)
 
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    @freeze_time("2017-07-04")
-    def test_clean_returns_cleaned_data_if_valid(self, mock_super, mock_init):
-        mock_init.return_value = None
-        from_date = datetime.date(2017, 7, 4)
-        to_date = from_date + datetime.timedelta(days=1)
-        form_data = {"from_date": from_date, "to_date": to_date}
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {"from_date": "7/4/2017", "to_date": "7/5/2017"}
-        form._errors = {}
+class TestFilterableListFormTopics(TestCase):
+    def test_topic_choices(self):
+        Tag.objects.bulk_create(
+            [Tag(slug=slugify(text), name=text) for text in ("Foo", "Bar")]
+        )
 
-        result = form.clean()
-        assert result["from_date"] == from_date
-        assert result["to_date"] == to_date
+        form = make_filterable_list_form(topic_slugs=["foo", "bar", "extra"])
 
-    @mock.patch("v1.forms.FilterableListForm.first_page_date")
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    @freeze_time("2017-01-15")
-    def test_clean_uses_earliest_result_if_fromdate_field_is_empty(
-        self, mock_super, mock_init, mock_pub_date
-    ):
-        mock_init.return_value = None
-        from_date = None
-        to_date = datetime.date(2017, 1, 15)
-        form_data = {"from_date": from_date, "to_date": to_date}
+        self.assertEqual(
+            form.fields["topics"].choices,
+            [
+                ("bar", "Bar"),
+                ("foo", "Foo"),
+            ],
+        )
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {"to_date": "1-15-2017"}
-        form._errors = {}
-        mock_pub_date.return_value = datetime.date(1995, 1, 1)
 
-        result = form.clean()
-        assert result["from_date"] == datetime.date(1995, 1, 1)
-        assert result["to_date"] == to_date
+class TestFilterableListForm(SimpleTestCase):
+    def test_language_codes(self):
+        form = make_filterable_list_form(language_codes=["es", "en", "ar"])
 
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    @freeze_time("2016-05-15")
-    def test_clean_uses_today_if_todate_field_is_empty(
-        self, mock_super, mock_init
-    ):
-        mock_init.return_value = None
-        from_date = datetime.date(2016, 5, 15)
-        to_date = None
-        form_data = {"from_date": from_date, "to_date": to_date}
+        self.assertEqual(
+            form.fields["language"].choices,
+            [("ar", "Arabic"), ("en", "English"), ("es", "Spanish")],
+        )
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = form_data
-        form.cleaned_data = form_data
-        form.data = {"from_date": "5-15-2016"}
-        form._errors = {}
+    def test_clean_from_and_to_date(self):
+        form = make_filterable_list_form(
+            data={"from_date": "7/4/2017", "to_date": "7/5/2017"}
+        )
 
-        result = form.clean()
-        assert result["from_date"] == from_date
-        assert result["to_date"] == datetime.date.today()
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["from_date"], date(2017, 7, 4))
+        self.assertEqual(form.cleaned_data["to_date"], date(2017, 7, 5))
 
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    def test_clean_returns_cleaned_data_if_both_date_fields_are_empty(
-        self, mock_super, mock_init
-    ):
-        mock_init.return_value = None
-        from_date = None
-        to_date = None
+    def test_from_date_uses_default_if_not_provided(self):
+        form = make_filterable_list_form(
+            default_min_date=date(2020, 1, 1),
+            data={"to_date": "12/25/2022"},
+        )
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = {
-            "from_date": from_date,
-            "to_date": to_date,
-        }
-        form.cleaned_data = {"from_date": from_date, "to_date": to_date}
-        form.data = {}
-        form._errors = {}
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["from_date"], date(2020, 1, 1))
+        self.assertEqual(form.cleaned_data["to_date"], date(2022, 12, 25))
 
-        result = form.clean()
-        assert result["from_date"] == from_date
-        assert result["to_date"] == to_date
+    @freeze_time("2023-05-01")
+    def test_to_date_uses_today_if_not_provided(self):
+        form = make_filterable_list_form(data={"from_date": "7/4/2017"})
 
-    @mock.patch("v1.forms.FilterableListForm.__init__")
-    @mock.patch("builtins.super")
-    @freeze_time("2000-03-15")
-    def test_clean_switches_date_fields_if_todate_is_less_than_fromdate(
-        self, mock_super, mock_init
-    ):
-        mock_init.return_value = None
-        to_date = datetime.date(2000, 3, 15)
-        from_date = to_date + datetime.timedelta(days=1)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["from_date"], date(2017, 7, 4))
+        self.assertEqual(form.cleaned_data["to_date"], date(2023, 5, 1))
 
-        form = FilterableListForm()
-        mock_super().clean.return_value = {
-            "from_date": from_date,
-            "to_date": to_date,
-        }
-        form.cleaned_data = {"from_date": from_date, "to_date": to_date}
-        form.data = {"from_date": "3/16/2000", "to_date": "3/15/2000"}
-        form._errors = {}
+    def test_both_dates_are_none_if_not_provided(self):
+        form = make_filterable_list_form(data={"title": "Test"})
 
-        result = form.clean()
-        assert result["from_date"] == to_date
-        assert result["to_date"] == from_date
+        self.assertTrue(form.is_valid())
+        self.assertIsNone(form.cleaned_data["from_date"])
+        self.assertIsNone(form.cleaned_data["to_date"])
+
+    def test_switches_dates_if_swapped(self):
+        form = make_filterable_list_form(
+            data={"from_date": "7/5/2017", "to_date": "7/4/2017"}
+        )
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["from_date"], date(2017, 7, 4))
+        self.assertEqual(form.cleaned_data["to_date"], date(2017, 7, 5))
+
+    def test_propogates_date_errors(self):
+        form = make_filterable_list_form(
+            data={"from_date": "7/5/2017", "to_date": "elephant"}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertEqual(
+            form.errors, {"to_date": ["You have entered an invalid date."]}
+        )
+
+    def test_do_not_index_unbound(self):
+        form = make_filterable_list_form()
+        self.assertFalse(form.do_not_index)
+
+    def test_do_not_index_filtered_by_title(self):
+        form = make_filterable_list_form(data={"title": "test"})
+        self.assertFalse(form.do_not_index)
+
+    def test_should_index_filtered_by_single_topic(self):
+        form = make_filterable_list_form(data={"topics": ["foo"]})
+        self.assertTrue(form.do_not_index)
+
+    def test_should_index_filtered_by_multiple_topics(self):
+        form = make_filterable_list_form(data={"topics": ["foo", "bar"]})
+        self.assertFalse(form.do_not_index)
+
+    def test_has_active_filters_unbound(self):
+        form = make_filterable_list_form()
+        self.assertFalse(form.has_active_filters)
+
+    def test_has_active_filters_title(self):
+        form = make_filterable_list_form(data={"title": "test"})
+        self.assertTrue(form.has_active_filters)
+
+    def test_has_active_filters_title_null_string(self):
+        form = make_filterable_list_form(data={"title": None})
+        self.assertFalse(form.has_active_filters)
+
+    def test_has_active_filters_title_empty_string(self):
+        form = make_filterable_list_form(data={"title": ""})
+        self.assertFalse(form.has_active_filters)
+
+    def test_has_active_filters_topics_null(self):
+        form = make_filterable_list_form(data={"topics": None})
+        self.assertFalse(form.has_active_filters)
+
+    def test_has_active_filters_topics_empty(self):
+        form = make_filterable_list_form(data={"topics": []})
+        self.assertFalse(form.has_active_filters)
+
+    def test_has_active_filters_topics_single_value(self):
+        form = make_filterable_list_form(data={"topics": ["foo"]})
+        self.assertTrue(form.has_active_filters)
+
+    def test_has_active_filters_topics_multiple_values(self):
+        form = make_filterable_list_form(data={"topics": ["foo", "bar"]})
+        self.assertTrue(form.has_active_filters)
 
 
 class TestFilterableDateField(TestCase):
@@ -150,6 +162,15 @@ class TestFilterableDateField(TestCase):
     def test_set_required(self):
         field = FilterableDateField(required=True)
         self.assertTrue(field.required)
+
+    def test_clean_valid_date(self):
+        self.assertEqual(
+            FilterableDateField().clean("1/2/1900"), date(1900, 1, 2)
+        )
+
+    def test_rejects_dates_before_1900(self):
+        with self.assertRaises(ValidationError):
+            FilterableDateField().clean("1/2/1899")
 
 
 class CFGOVImageFormTests(TestCase):
