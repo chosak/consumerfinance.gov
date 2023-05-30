@@ -248,18 +248,21 @@ class FilterableListForm(forms.Form):
     def do_not_index(self):
         """Whether the results from this form should be indexed by crawlers.
 
-        Do not index queries unless they consist of a single topic field.
-        This means that we don't index if all of these are true:
-
-        - the form is bound (some data was submitted)
-        - the only filter that was applied was the "topics" filter
-        - only a single topic filter was provided
+        Allow indexing of the form's default state, without any filters.
+        Otherwise, do not index queries unless they consist of a single topic
+        field.
         """
-        return (
-            self.is_bound
-            and list(self.data.keys()) == ["topics"]
-            and len(self.data["topics"]) == 1
-        )
+        if not self.is_bound:
+            return False
+
+        if not self.data:
+            return False
+
+        if list(self.data.keys()) != ["topics"]:
+            return True
+
+        topics = self.data.get("topics")
+        return not (isinstance(topics, str) or len(topics) == 1)
 
     @property
     def has_active_filters(self):

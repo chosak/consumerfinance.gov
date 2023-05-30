@@ -105,21 +105,25 @@ class TestFilterableListForm(SimpleTestCase):
             form.errors, {"to_date": ["You have entered an invalid date."]}
         )
 
-    def test_do_not_index_unbound(self):
+    def test_should_index_unbound(self):
         form = make_filterable_list_form()
+        self.assertFalse(form.do_not_index)
+
+    def test_should_index_empty_data(self):
+        form = make_filterable_list_form(data={})
         self.assertFalse(form.do_not_index)
 
     def test_do_not_index_filtered_by_title(self):
         form = make_filterable_list_form(data={"title": "test"})
-        self.assertFalse(form.do_not_index)
+        self.assertTrue(form.do_not_index)
 
     def test_should_index_filtered_by_single_topic(self):
         form = make_filterable_list_form(data={"topics": ["foo"]})
-        self.assertTrue(form.do_not_index)
-
-    def test_should_index_filtered_by_multiple_topics(self):
-        form = make_filterable_list_form(data={"topics": ["foo", "bar"]})
         self.assertFalse(form.do_not_index)
+
+    def test_do_not_index_filtered_by_multiple_topics(self):
+        form = make_filterable_list_form(data={"topics": ["foo", "bar"]})
+        self.assertTrue(form.do_not_index)
 
     def test_has_active_filters_unbound(self):
         form = make_filterable_list_form()
