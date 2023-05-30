@@ -1,66 +1,99 @@
 # Filterable Lists
 
-In order to provide a broad, configurable search and filtering interface across areas of our site, we have implemented a custom StreamField block, [FilterableList](https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/atomic_elements/organisms.py#L802), that allows a user to specify what filters are available, how to order results, and which pages should be included in the search.
+[As described in the CFPB Design System](https://cfpb.github.io/design-system/pages/filterable-list-pages),
+filterable list pages house searchable lists of articles, documents, or other resources or publications.
+Several Wagtail page types in this project implement this pattern to provide a broad,
+configurable search and filtering interface across multiple areas of our site.
 
-- [How It Works](#how-it-works)
-  - [FilterableListMixin](#filterablelistmixin)
-  - [CategoryFilterableMixin](#categoryfilterablemixin)
-- [Forms](#forms)
-  - [FilterableListForm](#filterablelistform)
-  - [EnforcementActionsFilterForm](#enforcementactionsfilterform)
-  - [EventArchiveFilterForm](#eventarchivefilterform)
-- [Documents](#documents)
-- [Search](#search)
-  - [FilterablePagesDocumentSearch](#filterablepagesdocumentsearch)
-  - [EventFilterablePagesDocumentSearch](#eventfilterablepagesdocumentsearch)
-  - [EnforcementActionFilterablePagesDocumentSearch](#enforcementactionfilterablepagesdocumentsearch)
+- [Overview](#overview)
+- [Indexing and search](#indexing-and-search)
+- [`FilterableListMixin`](#filterablelistmixin)
+- [`FilterableList`](#filterablelist)
 
-## How It Works
+## Overview
 
-The journey on how a page gets a filterable form is not necessarily a straight or simple path, but it is something that is important to know. To start, the page must support the `FilterableList` block within a StreamField as we mentioned earlier, but from there we start to see some divergence. In order to utilize the `FilterableList` the page must support one of the following two classes: `FilterableListMixin` or `CategoryFilterableMixin`.
+Creating a page with a filterable list requires two things:
 
-### FilterableListMixin
+- the page type must inherit from the
+  [`FilterableListMixin`](https://github.com/cfpb/consumerfinance.gov/blob/7b9084eb6747f002fc4c1a976590c3366d9845ff/cfgov/v1/models/filterable_list_mixins.py#L14) mixin.
+- the page must be configured with a special
+  [`FilterableList`](https://github.com/cfpb/consumerfinance.gov/blob/7b9084eb6747f002fc4c1a976590c3366d9845ff/cfgov/v1/atomic_elements/organisms.py#L684)
+  StreamField block.
 
-The more common mixin that pages will extend is the [FilterableListMixin](https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/models/filterable_list_mixins.py#L15). This class defines several important methods, such as `get_form_class`, which defines the form to use. We also have some methods that retrieve relevant information for the form to use, such as `get_filterable_root` and `get_filterable_queryset`. The bulk of the work is done in the `get_context` method, which is responsible for getting and populating the form, processing the form, and returning the results to the user.
+When these two requirements are met, the page will support displaying a list of other pages on the site.
 
-### CategoryFilterableMixin
+By default, a page displays a paginated list of its direct children that inherit from the
+[`AbstractFilterPage`](https://github.com/cfpb/consumerfinance.gov/blob/7b9084eb6747f002fc4c1a976590c3366d9845ff/cfgov/v1/models/learn_page.py#L31) page type.
+The exact style and functionality of both the user-facing filter controls and the list of search results can be customized, either via editor controls on the `FilterableList` block or via the source code of `FilterableListMixin` page types.
 
-The [CategoryFilterableMixin](https://github.com/cfpb/consumerfinance.gov/blob/3250275fdcca54a600859d8af3bcfde983200dfa/cfgov/v1/models/filterable_list_mixins.py#L183) is an extension of the base `FilterableListMixin` that exposes some new functionality. It modifies how `get_filterable_queryset` operates in that it gets an initial list of pages but limits them to only ones that are assigned a category within a set of initial categories, which is defined as the variable `filterable_categories` on a given page model. We can see this in action with both Newsroom (`NewsroomLandingPage`) and Recent Updates (`ActivityLogPage`) pages.
+Under the hood, search is powered by an
+[OpenSearch](https://opensearch.org/)
+search index that mirrors the content of `AbstractFilterPage` pages
+on the website. Filterable lists allow for text-based content search and filtering by date range, page topics and categories, and more.
 
-### Forms
+## Indexing and search
 
-As of our initial release of Elasticsearch-backed filterable lists in March 2021, our filterable forms can be broken into three specific forms: `FilterableListForm`, `EnforcementActionsFilterableListForm`, and `EventArchiveFilterForm`. The majority of our filterable lists rely on `FilterableListForm` and the other two are each leveraged by a single page.
+Wagtail pages are indexed into OpenSearch using the
+[django-opensearch-dsl](https://django-opensearch-dsl.readthedocs.io/en/latest/)
+package.
 
-#### FilterableListForm
+The
+[`FilterablePageDocument`](https://github.com/cfpb/consumerfinance.gov/blob/5d7483cc4d8a20d121590e5a89e8fef5569d2c93/cfgov/v1/documents.py#L23)
+class implements a django-opensearch-dsl
+[document](https://django-opensearch-dsl.readthedocs.io/en/latest/document/) that is used to index data related to any of the filterable page types that extend `AbstractFilterPage`, including `BlogPage`, `EnforcementActionPage`, `EventPage`, and `NewsroomPage`.
 
-This is the base form that the vast majority of cf.gov uses for filterable lists. It defines the core fields that are visible on the form as well as functions to assist in setting initial data and sanitizing form input. The important information regarding `FilterableListForm` is that it defines the function `get_page_set`, which is responsible for invoking a search query. The logic regarding how to pass categories into the search object is due to the previously mentioned `CategoryFilterableMixin`, which modifies the initial search parameters to enforce a category search if and only if the `filterable_categories` list is passed into the form when initialized.
+The django-opensearch-dsl
+[Django management commands](https://django-opensearch-dsl.readthedocs.io/en/latest/management/)
+`manage.py opensearch index` and `manage.py opensearch document` are used to create and populate an OpenSearch index with filterable page data.
+The index is also automatically kept up to date with changes when pages are published or moved.
 
-#### EnforcementActionsFilterForm
+The
+[`FilterablePagesSearch`](https://github.com/cfpb/consumerfinance.gov/blob/5d7483cc4d8a20d121590e5a89e8fef5569d2c93/cfgov/v1/documents.py#L114)
+class is used to make queries against the search index.
 
-The `EnforcementActionsFilterForm` is an extension of `FilterableListForm`, adding on two fields specific to Enforcement Actions, and using a refined search class to provide search functionality against the new fields and a proper ordering by initial filing date.
+## `FilterableListMixin`
 
-#### EventArchiveFilterForm
+The
+[`FilterableMixin`](https://github.com/cfpb/consumerfinance.gov/blob/7b9084eb6747f002fc4c1a976590c3366d9845ff/cfgov/v1/models/filterable_list_mixins.py#L14)
+mixin adds filtering capability to Wagtail page types that inherit from it.
+The bulk of the mixin's work is done in its `get_context` method, which searches the index to retrieve results appropriate to the user's request.
+Those results are then rendered as part of the page.
 
-The `EventArchiveFilterForm` is another extension of `FilterableListForm`, the only real modification being the invocation of an event specific search class that allows us to provide filtering based on event dates rather than page publication dates.
+The mixin defines various attributes which can be overriden to customize its functionality:
 
-### Documents
+### `filterable_per_page_limit`
 
-There is currently only one type of document defined, `FilterablePagesDocument`, which is based off the `AbstractFilterPage` class. This document is responsible for housing data related to any of the filterable page types that extend `AbstractFilterPage`, including `EnforcementActionPage`, `BlogPage`, `EventPage`, and `NewsroomPage`, to name a few. In order to get fields that are specific to a page type, such as the status list for an Enforcement Action, you use the `prepare_field` function syntax. The use of `get_instances_from_related` is to enforce the auto-updating of our index when changes occur to a specific page we have indexed, rather than just the relation to `AbstractFilterPage` that is reflected in the database.
+Number of results to show per page. Defaults to 25.
 
-### Search
+### `filterable_categories`
 
-Search is the final piece of the puzzle, where we actually leverage Elasticsearch to filter and match documents and return them in an ordered `QuerySet`. Before breaking down the search classes, it's important to discuss the current implementation from an Elasticsearch perspective to understand how we're gathering results.
+When defined as a list of page categories, only pages from those categories will be included in filter results.
+Defaults to an empty list.
 
-The expanded search for filterable lists is using a [multi-match query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html) across the title, topic name, preview description, and content fields of all `FilterablePagesDocument`s. We are leveraging a [phrase_prefix](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-multi-match-query.html#type-phrase) matching style with a currently configured slop of 2, to allow for some looser matching restrictions. We also provide a boost score for matching to the title and topic name fields, indicated by `^10` within the code base. This boost score is to enable better ordering by relevance when desired. Search currently supports two different methods of ordering results: relevance and date published. Relevance is calculated by the Elasticsearch engine when returning results, and the date published is calculated based on page publication date. Enforcement Actions define their own ordering logic based on initial filing date.
+For example, the `NewsroomLandingPage` page type sets this attribute this way:
 
-#### FilterablePagesDocumentSearch
+```py
+class NewsroomLandingPage:
+    filterable_categories = ["Blog", "Newsroom"]
+```
 
-`FilterablePagesDocumentSearch` is the core search class that is used across the majority of our searching. It is invoked from `FilterableListForm`. This search class defines the common structure for our search function, as well as the base logic for filtering against all common fields and logic behind our multi-match and ordering steps. The core function called from outside the class is the `search` function, which properly chains all of our filter/match/sorting logic and returns the resulting list as a Django `QuerySet`.
+so that only pages from these categories appear in filter results.
 
-#### EventFilterablePagesDocumentSearch
+### `filterable_page_type`
 
-`EventFilterablePagesDocumentSearch` is an extension of `FilterablePagesDocumentSearch` that defines behavior specific to our future and past Events listings. The class overwrites one method from its parent, the `filter_date` function, to change the behavior to filter based on fields specific to events, the start and end date of an event.
+When set to a Wagtail page type, only pages of that type will be included in filter results.
+Defaults to `None`, meaning that any available pages in the search space may be returned.
 
-#### EnforcementActionsFilterableListForm
+For example, the `EventArchivePage` page types sets this attribute this way:
 
-`EnforcementActionsFilterForm` is an extension of `FilterablePagesDocumentSearch` that exposes some additional filter logic through the `apply_specific_filters` function. We also see that `filter_date` and `order_results` have been overwritten to leverage an Enforcement Action-specific field, initial filing date.
+```py
+class EventArchivePage:
+    filterable_page_type = EventPage
+```
+
+so that only pages of that type appear in filter results.
+
+## `FilterableList`
+
+[`FilterableList`](<(https://github.com/cfpb/consumerfinance.gov/blob/7b9084eb6747f002fc4c1a976590c3366d9845ff/cfgov/v1/atomic_elements/organisms.py#L684)>)
+is the StreamField block that must be added to a page to render search results. This block contains numerous configuration options that determine how results are filtered and what filtering choices are displayed to the end user.
