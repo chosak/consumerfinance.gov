@@ -1,22 +1,18 @@
 import json
+from datetime import date, datetime
 from io import StringIO
 from unittest.mock import patch
 
 from django.test import TestCase
 from django.utils import timezone
 
-from wagtail.models import Page, Site
+from wagtail.models import Page
 
 from dateutil.relativedelta import relativedelta
 
 from core.testutils.test_cases import WagtailPageTreeTestCase
 from search.elasticsearch_helpers import ElasticsearchTestsMixin
-from v1.documents import (
-    EnforcementActionFilterablePagesDocumentSearch,
-    EventFilterablePagesDocumentSearch,
-    FilterablePagesDocument,
-    FilterablePagesDocumentSearch,
-)
+from v1.documents import FilterablePagesDocument, FilterablePagesSearch
 from v1.models import (
     AbstractFilterPage,
     BlogPage,
@@ -69,6 +65,31 @@ class FilterablePagesDocumentTest(TestCase):
         test_event = EventPage(title="Testing", start_dt=timezone.now())
         qs = FilterablePagesDocument().get_queryset()
         self.assertFalse(qs.filter(title=test_event.title).exists())
+
+    def test_prepare_start_and_end_dates(self):
+        document = FilterablePagesDocument()
+
+        ddp = DocumentDetailPage(date_published=date(2023, 1, 1))
+        ddp_data = document.prepare(ddp)
+        self.assertEqual(ddp_data["start_date"], ddp.date_published)
+        self.assertEqual(ddp_data["end_date"], ddp.date_published)
+
+        eap = EnforcementActionPage(
+            date_published=date(2023, 1, 1),
+            initial_filing_date=date(2022, 12, 1),
+        )
+        eap_data = document.prepare(eap)
+        self.assertEqual(eap_data["start_date"], eap.initial_filing_date)
+        self.assertEqual(eap_data["end_date"], eap.initial_filing_date)
+
+        ep = EventPage(
+            date_published=date(2023, 1, 1),
+            start_dt=datetime(2023, 2, 1),
+            end_dt=datetime(2023, 2, 2),
+        )
+        ep_data = document.prepare(ep)
+        self.assertEqual(ep_data["start_date"], ep.start_dt)
+        self.assertEqual(ep_data["end_date"], ep.end_dt)
 
     def test_prepare_statuses(self):
         enforcement = EnforcementActionPage(
@@ -144,6 +165,12 @@ class ElasticsearchWagtailPageTreeTestCase(
         )
 
 
+def add_to_page(slug, field, value):
+    page = Page.objects.get(slug=slug).specific
+    getattr(page, field).add(value)
+    page.save()
+
+
 class FilterableSearchTests(ElasticsearchWagtailPageTreeTestCase):
     @classmethod
     def get_page_tree(cls):
@@ -151,9 +178,15 @@ class FilterableSearchTests(ElasticsearchWagtailPageTreeTestCase):
             (
                 SublandingFilterablePage(title="search1"),
                 [
-                    DocumentDetailPage(title="child1"),
+                    DocumentDetailPage(
+                        title="child1",
+                        language="en",
+                        date_published=date(2023, 1, 1),
+                    ),
                     DocumentDetailPage(
                         title="child2",
+                        language="es",
+                        date_published=date(2023, 1, 2),
                         preview_title="2child",
                         preview_subheading="2child2",
                     ),
@@ -168,77 +201,104 @@ class FilterableSearchTests(ElasticsearchWagtailPageTreeTestCase):
             )
         ]
 
-    def test_search_from_root(self):
+    @classmethod
+    def build_page_tree(cls, page_tree):
+        tree = super().build_page_tree(page_tree)
+
+        # Tags need to be added to pages after they've already been saved.
+        add_to_page("child1", "tags", "foo")
+        add_to_page("child2", "tags", "bar")
+
+        return tree
+
+    def test_search_root_without_aggregates(self):
         # By default search only returns AbstractFilterPages
         # that are direct children of the specified root.
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        self.assertEqual(search.count(), 2)
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search()
+
+        self.assertEqual(len(results), 2)
+        self.assertIsNone(results.min_start_date)
+        self.assertIsNone(results.language_codes)
+        self.assertIsNone(results.tag_slugs)
+
+    def test_search_root_with_aggregates(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(include_aggregates=True)
+
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results.min_start_date, date(2023, 1, 1))
+        self.assertEqual(results.language_codes, ["en", "es"])
+        self.assertEqual(results.tag_slugs, ["bar", "foo"])
+
+    def test_search_root_with_aggregates_insufficient_buckets(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        with self.assertRaises(RuntimeError) as e:
+            search.search(include_aggregates=True, aggregate_bucket_count=1)
+
+        self.assertIn("Aggregation exceeded bucket count", str(e.exception))
+
+    def test_search_results_slicing(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search()
+
+        child1 = AbstractFilterPage.objects.get(slug="child1")
+
+        first = results[0]
+        self.assertEqual(first, child1)
+
+        sliced = results[:1]
+        self.assertEqual(sliced.count(), 1)
+        self.assertQuerysetEqual(sliced, [child1])
 
     def test_search_children_only(self):
         # Setting children_only to False returns all AbstractFilterablePages
         # that live anywhere underneath the specified root.
-        search = FilterablePagesDocumentSearch(
-            self.page_tree[0], children_only=False
-        )
-        self.assertEqual(search.count(), 4)
+        search = FilterablePagesSearch(self.page_tree[0], children_only=False)
+        results = search.search()
+
+        self.assertEqual(len(results), 4)
 
     def test_search_from_other_page(self):
         # Search works starting from some other page in the tree.
         page = Page.objects.get(slug="search2")
-        search = FilterablePagesDocumentSearch(page)
-        self.assertEqual(search.count(), 2)
+        search = FilterablePagesSearch(page)
+        results = search.search()
+
+        self.assertEqual(len(results), 2)
 
     def test_search_by_title(self):
-        search = FilterablePagesDocumentSearch(
-            self.page_tree[0], children_only=False
-        )
-        self.assertEqual(search.search(title="child").count(), 4)
-        self.assertEqual(search.search(title="child1").count(), 2)
-        self.assertEqual(search.search(title="child3").count(), 0)
+        search = FilterablePagesSearch(self.page_tree[0], children_only=False)
+
+        self.assertEqual(len(search.search(title="child")), 4)
+        self.assertEqual(len(search.search(title="child1")), 2)
+        self.assertFalse(search.search(title="child3"))
 
     def test_search_by_preview_title(self):
-        search = FilterablePagesDocumentSearch(
-            self.page_tree[0], children_only=False
-        )
+        search = FilterablePagesSearch(self.page_tree[0], children_only=False)
+
         results_title = search.search(title="child2")
+        self.assertEqual(len(results_title), 2)
+
         results_preview_title = search.search(title="2child")
-        self.assertEqual(results_title.count(), 2)
-        self.assertEqual(results_preview_title.count(), 1)
+        self.assertEqual(len(results_preview_title), 1)
 
     def test_search_by_preview_subheading(self):
-        search = FilterablePagesDocumentSearch(
-            self.page_tree[0], children_only=False
-        )
+        search = FilterablePagesSearch(self.page_tree[0], children_only=False)
         results_preview_subheading = search.search(title="2child2")
-        self.assertEqual(results_preview_subheading.count(), 1)
+        self.assertEqual(len(results_preview_subheading), 1)
 
-    def test_get_raw_results(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        results = search.get_raw_results()
-        self.assertEqual(len(results.hits), 2)
-
-    # Mocking is necessary here because unfortunately it's not currently
-    # possible to use override_settings with DOD autosync. See
-    # https://github.com/django-es/django-elasticsearch-dsl/issues/322.
-    @patch(
-        "django_opensearch_dsl.apps.DODConfig.autosync_enabled",
-        return_value=True,
-    )
-    def test_index_updates_automatically(self, _):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        self.assertEqual(search.search(title="foo").count(), 0)
-        indexed_page = Page.objects.get(slug="child1").specific
-        indexed_page.title = "child1 foo"
-        indexed_page.save_revision().publish()
-        self.assertEqual(search.search(title="foo").count(), 1)
+    def test_search_results_bool(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        self.assertTrue(search.search(title="child"))
+        self.assertFalse(search.search(title="dlihc"))
 
 
-class FilterableSearchFilteringTests(
-    ElasticsearchTestsMixin, WagtailPageTreeTestCase
-):
+class FilterableSearchFilteringTests(ElasticsearchWagtailPageTreeTestCase):
     @classmethod
     def get_page_tree(cls):
-        cls.today = timezone.now().date()
+        cls.now = timezone.now()
+        cls.today = cls.now.date()
         cls.yesterday = cls.today - relativedelta(days=1)
 
         return [
@@ -246,243 +306,166 @@ class FilterableSearchFilteringTests(
                 SublandingFilterablePage(title="search"),
                 [
                     BlogPage(
-                        title="en",
+                        title="blog1",
                         language="en",
                         date_published=cls.today,
                     ),
                     BlogPage(
-                        title="es",
+                        title="blog2",
                         language="es",
                         date_published=cls.yesterday,
                     ),
+                    EnforcementActionPage(title="enforcement1"),
+                    EnforcementActionPage(title="enforcement2"),
+                    EventPage(title="event1", start_dt=cls.now),
+                    EventPage(title="event2", start_dt=cls.now),
                 ],
             ),
         ]
 
     @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
+    def build_page_tree(cls, page_tree):
+        tree = super().build_page_tree(page_tree)
 
-        # Page tags and categories can't be set at creation time, so they need
-        # to be added after the page tree has been created.
-        def add_tag_and_category_to_page(page_slug, name):
-            page = BlogPage.objects.get(slug=page_slug)
-            page.tags.add(name)
-            page.categories.add(CFGOVPageCategory(name=name))
-            page.save()
-
-        add_tag_and_category_to_page("en", "foo")
-        add_tag_and_category_to_page("es", "bar")
-
-        cls.rebuild_elasticsearch_index(
-            FilterablePagesDocument.Index.name, stdout=StringIO()
+        # Page tags, categories, products, and statuses can't be set at
+        # creation time, so they need to be added after the page tree
+        # has been created.
+        add_to_page("blog1", "tags", "foo")
+        add_to_page("blog1", "categories", CFGOVPageCategory(name="foo"))
+        add_to_page("blog2", "tags", "bar")
+        add_to_page("blog2", "categories", CFGOVPageCategory(name="bar"))
+        add_to_page(
+            "enforcement1",
+            "products",
+            EnforcementActionProduct(product="Debt Collection"),
+        )
+        add_to_page(
+            "enforcement2",
+            "statuses",
+            EnforcementActionStatus(status="expired-terminated-dismissed"),
         )
 
-    def test_no_filters(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        self.assertEqual(search.count(), 2)
+        return tree
 
-        search.filter()
-        self.assertEqual(search.count(), 2)
+    def test_no_filters(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search()
+        self.assertEqual(len(results), 6)
+
+    def test_ordering_default(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search()
+        self.assertEqual(
+            results[0],
+            AbstractFilterPage.objects.get(slug="blog1"),
+        )
+
+    def test_ordering_custom(self):
+        search = FilterablePagesSearch(
+            self.page_tree[0], ordering="-title.raw"
+        )
+        results = search.search()
+        self.assertEqual(
+            results[0],
+            AbstractFilterPage.objects.get(slug="event2"),
+        )
 
     def test_filter_by_language(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        self.assertEqual(search.count(), 2)
-
-        search.filter_language(["es"])
-        self.assertEqual(search.count(), 1)
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(language="es")
+        self.assertEqual(len(results), 1)
 
     def test_filter_by_date(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter_date(from_date=self.today, to_date=self.today)
-        self.assertEqual(search.count(), 1)
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(from_date=self.today, to_date=self.today)
+        self.assertEqual(len(results), 1)
 
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter_date(from_date=self.yesterday, to_date=self.yesterday)
-        self.assertEqual(search.count(), 1)
+        results = search.search(
+            from_date=self.yesterday, to_date=self.yesterday
+        )
+        self.assertEqual(len(results), 1)
+
+        results = search.search(from_date=self.today)
+        self.assertEqual(len(results), 1)
+
+        results = search.search(to_date=self.yesterday)
+        self.assertEqual(len(results), 1)
 
     def test_filter_by_topics(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter_topics(["foo"])
-        self.assertEqual(search.count(), 1)
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(topics=["foo"])
+        self.assertEqual(len(results), 1)
+
+        results = search.search(topics=["bad"])
+        self.assertFalse(results)
 
     def test_filter_by_categories(self):
-        search = FilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter_categories(["bar"])
-        self.assertEqual(search.count(), 1)
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(categories=["bar"])
+        self.assertEqual(len(results), 1)
 
+        results = search.search(categories=["bad"])
+        self.assertFalse(results)
 
-class EnforcementActionFilterableSearchFilteringTests(
-    ElasticsearchTestsMixin, WagtailPageTreeTestCase
-):
-    @classmethod
-    def get_page_tree(cls):
-        cls.today = timezone.now().date()
-        cls.yesterday = cls.today - relativedelta(days=1)
+    def test_filter_by_class(self):
+        search = FilterablePagesSearch(self.page_tree[0])
+        results = search.search(model_class=EventPage.__name__)
+        self.assertEqual(len(results), 2)
 
-        return [
-            (
-                SublandingFilterablePage(title="search1"),
-                [
-                    EnforcementActionPage(
-                        title="child1", initial_filing_date=cls.yesterday
-                    ),
-                    EnforcementActionPage(
-                        title="child2", initial_filing_date=cls.today
-                    ),
-                    DocumentDetailPage(title="should be ignored"),
-                ],
-            ),
-        ]
+    def test_filter_by_products(self):
+        search = FilterablePagesSearch(self.page_tree[0])
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        # Page status and products can't be set at creation time, so they need
-        # to be added after the page tree has been created.
-        page = EnforcementActionPage.objects.get(slug="child1")
-        status = EnforcementActionStatus(status="expired-terminated-dismissed")
-        page.statuses.add(status)
-        product = EnforcementActionProduct(product="Debt Collection")
-        page.products.add(product)
-        page.save()
-
-        cls.rebuild_elasticsearch_index(
-            FilterablePagesDocument.Index.name, stdout=StringIO()
+        results = search.search(products=["Debt Collection"])
+        self.assertEqual(len(results), 1)
+        self.assertEqual(
+            results[0].specific,
+            EnforcementActionPage.objects.get(slug="enforcement1"),
         )
 
-    def test_no_filters(self):
-        search = EnforcementActionFilterablePagesDocumentSearch(
-            self.page_tree[0], ordering="-start_date"
-        )
-        search.filter()
-        results = search.search()
+        results = search.search(products=["bad"])
+        self.assertFalse(results)
 
-        # The EA search default filter behavior excludes pages that are not of
-        # type EnforcementActionPage.
-        self.assertEqual(results.count(), 2)
+    def test_filter_by_statuses(self):
+        search = FilterablePagesSearch(self.page_tree[0])
 
-        # Results should be ordered by most recent initial filing date.
-        self.assertEqual(results[0].title, "child2")
-        self.assertEqual(results[1].title, "child1")
-
-    def test_filter_by_status(self):
-        search = EnforcementActionFilterablePagesDocumentSearch(
-            self.page_tree[0]
-        )
-        search.filter(statuses=["expired-terminated-dismissed"])
-        self.assertEqual(search.count(), 1)
-
-    def test_filter_by_product(self):
-        search = EnforcementActionFilterablePagesDocumentSearch(
-            self.page_tree[0]
+        results = search.search(statuses=["expired-terminated-dismissed"])
+        self.assertEqual(len(results), 1)
+        self.assertEqual(
+            results[0].specific,
+            EnforcementActionPage.objects.get(slug="enforcement2"),
         )
 
-        search.filter(products=["Debt Collection"])
-        self.assertEqual(search.count(), 1)
-
-    def test_filter_by_date(self):
-        search = EnforcementActionFilterablePagesDocumentSearch(
-            self.page_tree[0]
-        )
-        search.filter(from_date=self.today, to_date=self.today)
-        self.assertEqual(search.count(), 1)
-
-        search = EnforcementActionFilterablePagesDocumentSearch(
-            self.page_tree[0]
-        )
-        search.filter(from_date=self.yesterday, to_date=self.yesterday)
-        self.assertEqual(search.count(), 1)
+        results = search.search(statuses=["bad"])
+        self.assertFalse(results)
 
 
-class EventFilterableSearchFilteringTests(
+class TestThatWagtailPageSignalsUpdateIndex(
     ElasticsearchWagtailPageTreeTestCase
 ):
     @classmethod
     def get_page_tree(cls):
-        cls.now = timezone.now()
-        cls.one_hour_ago = cls.now - relativedelta(hours=1)
-        cls.one_day_ago = cls.now - relativedelta(days=1)
-
         return [
             (
-                SublandingFilterablePage(title="search1"),
+                BlogPage(title="parent", live=True),
                 [
-                    EventPage(
-                        title="child1",
-                        start_dt=cls.one_day_ago,
-                        end_dt=cls.one_hour_ago,
-                    ),
-                    EventPage(
-                        title="child2",
-                        start_dt=cls.one_hour_ago,
-                        end_dt=cls.now,
-                    ),
-                    DocumentDetailPage(title="should be ignored"),
+                    BlogPage(title="blog1", live=True),
+                    BlogPage(title="blog2", live=True),
+                    BlogPage(title="blog3", live=True),
                 ],
             ),
         ]
 
-    def test_no_filters(self):
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter()
-        results = search.search()
+    def test_signals_update_index(self):
+        root = self.page_tree[0]
+        blog1 = BlogPage.objects.get(slug="blog1")
+        blog2 = BlogPage.objects.get(slug="blog2")
+        blog3 = BlogPage.objects.get(slug="blog3")
 
-        # The event search default filter behavior excludes pages that are not
-        # of type EventPage.
-        self.assertEqual(results.count(), 2)
-
-    def test_filter_by_date(self):
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(from_date=self.one_day_ago)
-        self.assertEqual(search.count(), 2)
-
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(from_date=self.now + relativedelta(days=1))
-        self.assertEqual(search.count(), 0)
-
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(to_date=self.now)
-        self.assertEqual(search.count(), 2)
-
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(to_date=self.one_day_ago - relativedelta(days=1))
-        self.assertEqual(search.count(), 0)
-
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(from_date=self.one_day_ago, to_date=self.now)
-        self.assertEqual(search.count(), 2)
-
-        search = EventFilterablePagesDocumentSearch(self.page_tree[0])
-        search.filter(from_date=self.one_day_ago, to_date=self.one_day_ago)
-        self.assertEqual(search.count(), 1)
-
-
-class TestThatWagtailPageSignalsUpdateIndex(ElasticsearchTestsMixin, TestCase):
-    def test_index_reflects_page_moves_and_deletions(self):
-        root = Site.objects.get(is_default_site=True).root_page
-
-        parent = BlogPage(title="parent", live=True)
-        root.add_child(instance=parent)
-
-        blog1 = BlogPage(title="foo 1", live=True)
-        parent.add_child(instance=blog1)
-
-        blog2 = BlogPage(title="foo 2", live=True)
-        parent.add_child(instance=blog2)
-
-        blog3 = BlogPage(title="foo 3", live=True)
-        parent.add_child(instance=blog3)
-
-        self.rebuild_elasticsearch_index(
-            FilterablePagesDocument.Index.name, stdout=StringIO()
-        )
-        search = FilterablePagesDocumentSearch(parent)
+        search = FilterablePagesSearch(self.page_tree[0])
 
         # Initially a search at the root should return 3 results.
-        results = search.search(title="foo")
-        self.assertEqual(results.count(), 3)
+        results = search.search(title="blog")
+        self.assertEqual(len(results), 3)
 
         # By default we set OPENSEARCH_DSL_AUTOSYNC to False in
         # settings.test, and there's unfortunately no better way to override
@@ -495,18 +478,18 @@ class TestThatWagtailPageSignalsUpdateIndex(ElasticsearchTestsMixin, TestCase):
             # Moving a page out of the parent should update the index so that
             # a search there now returns only 2 results.
             blog2.move(root)
-            results = search.search(title="foo")
-            self.assertEqual(results.count(), 2)
+            results = search.search(title="blog")
+            self.assertEqual(len(results), 2)
 
             # Updating a page should also update the index so that a search
             # now returns only 1 result.
             blog3.title = "bar"
             blog3.save_revision().publish()
-            results = search.search(title="foo")
-            self.assertEqual(results.count(), 1)
+            results = search.search(title="blog")
+            self.assertEqual(len(results), 1)
 
             # Deleting the remaining page with "blog" in the root should
             # result in an empty search result.
             blog1.delete()
-            results = search.search(title="foo")
-            self.assertEqual(results.count(), 0)
+            results = search.search(title="blog")
+            self.assertFalse(results)

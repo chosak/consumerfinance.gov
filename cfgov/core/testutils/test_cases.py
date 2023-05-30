@@ -26,15 +26,20 @@ class WagtailPageTreeTestCase(TestCase):
 
     The class variable `page_tree` can also be used by tests to reference
     pages that were added to the tree.
+
+    Test cases that inherit from this mixin can also override the
+    build_page_tree(page_tree) classmethod to customize tree creation or to
+    add additional setup once the tree has been created.
     """
 
     @classmethod
     def setUpTestData(cls):
-        site = Site.objects.get(is_default_site=True)
+        cls.page_tree = cls.build_page_tree(cls.get_page_tree())
 
-        cls.page_tree = cls._build_page_tree(
-            site.root_page, cls.get_page_tree()
-        )
+    @classmethod
+    def build_page_tree(cls, page_tree):
+        site = Site.objects.get(is_default_site=True)
+        return cls._build_page_tree(site.root_page, page_tree)
 
     @classmethod
     def _build_page_tree(cls, root, page_tree):
