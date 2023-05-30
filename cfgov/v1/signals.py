@@ -1,7 +1,7 @@
 from itertools import chain
 
 from django.conf import settings
-from django.core.cache import cache, caches
+from django.core.cache import caches
 from django.dispatch import receiver
 
 from wagtail.signals import page_published, page_unpublished
@@ -12,10 +12,7 @@ from teachers_digital_platform.models.activity_index_page import (
 )
 from v1.models import AbstractFilterPage, CFGOVPage
 from v1.models.caching import AkamaiBackend
-from v1.models.filterable_list_mixins import (
-    CategoryFilterableMixin,
-    FilterableListMixin,
-)
+from v1.models.filterable_list_mixin import FilterableListMixin
 from v1.util.ref import get_category_children
 
 
@@ -46,12 +43,13 @@ def invalidate_filterable_list_caches(sender, **kwargs):
         page.get_ancestors().type(FilterableListMixin).specific().all()
     )
 
-    # Next, see if it belongs to any CategoryFilterableMixin filterable lists
+    # Next, see if it belongs to any FilterableListMixins at all that have
+    # one of its categories set in their filterable_categories.
     page_categories = page.categories.values_list("name", flat=True)
     category_filterable_list_pages = (
         category_filterable_list_page
         for category_filterable_list_page in CFGOVPage.objects.type(
-            CategoryFilterableMixin
+            FilterableListMixin
         ).specific()
         if any(
             category
@@ -65,25 +63,14 @@ def invalidate_filterable_list_caches(sender, **kwargs):
 
     # Combine parent filterable list pages and category filterable list pages
     filterable_list_pages = list(
-        chain(filterable_list_pages, category_filterable_list_pages)
+        set(chain(filterable_list_pages, category_filterable_list_pages))
     )
 
-    cache_tags_to_purge = []
-    for filterable_list_page in filterable_list_pages:
-        cache_key_prefix = filterable_list_page.get_cache_key_prefix()
-
-        # Delete internal cache for the filterable list page
-        cache.delete(f"{cache_key_prefix}-all_filterable_results")
-        cache.delete(f"{cache_key_prefix}-page_ids")
-        cache.delete(f"{cache_key_prefix}-topics")
-        cache.delete(f"{cache_key_prefix}-authors")
-
-        # Add the filterable list's slug to the list of cache tags to purge
-        cache_tags_to_purge.append(filterable_list_page.slug)
+    cache_tags_to_purge = [page.slug for page in filterable_list_pages]
 
     # Get the cache backend and purge filterable list page cache tags if this
     # page belongs to any
-    if len(cache_tags_to_purge) > 0:
+    if cache_tags_to_purge:
         cache_backend = configure_akamai_backend()
         cache_backend.purge_by_tags(cache_tags_to_purge)
 

@@ -3,16 +3,9 @@ from wagtail.blocks import StreamBlock
 from wagtail.fields import StreamField
 
 from v1.atomic_elements import molecules, organisms
-from v1.documents import (
-    EnforcementActionFilterablePagesDocumentSearch,
-    EventFilterablePagesDocumentSearch,
-)
 from v1.models.browse_page import AbstractBrowsePage
 from v1.models.enforcement_action_page import EnforcementActionPage
-from v1.models.filterable_list_mixins import (
-    CategoryFilterableMixin,
-    FilterableListMixin,
-)
+from v1.models.filterable_list_mixin import FilterableListMixin
 from v1.models.learn_page import EventPage
 
 
@@ -71,40 +64,14 @@ class BrowseFilterablePage(FilterableListMixin, AbstractBrowsePage):
 
 class EnforcementActionsFilterPage(BrowseFilterablePage):
     template = "v1/browse-filterable/index.html"
-
-    @staticmethod
-    def get_form_class():
-        from .. import forms
-
-        return forms.EnforcementActionsFilterForm
-
-    @staticmethod
-    def get_model_class():
-        return EnforcementActionPage
-
-    @staticmethod
-    def get_search_class():
-        return EnforcementActionFilterablePagesDocumentSearch
+    filterable_page_type = EnforcementActionPage
 
 
 class EventArchivePage(BrowseFilterablePage):
     template = "v1/browse-filterable/index.html"
-
-    @staticmethod
-    def get_model_class():
-        return EventPage
-
-    @staticmethod
-    def get_form_class():
-        from .. import forms
-
-        return forms.EventArchiveFilterForm
-
-    @staticmethod
-    def get_search_class():
-        return EventFilterablePagesDocumentSearch
+    filterable_page_type = EventPage
 
 
-class NewsroomLandingPage(CategoryFilterableMixin, BrowseFilterablePage):
+class NewsroomLandingPage(BrowseFilterablePage):
     template = "v1/newsroom/index.html"
     filterable_categories = ["Newsroom"]

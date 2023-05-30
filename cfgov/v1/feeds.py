@@ -30,8 +30,7 @@ class FilterableFeed(Feed):
         return "%s | Consumer Financial Protection Bureau" % self.page.title
 
     def items(self):
-        posts = self.context["filter_data"]["page_set"]
-        return posts
+        return self.context["pages"]
 
     def item_link(self, item):
         return item.full_url
@@ -68,7 +67,7 @@ def get_appropriate_rss_feed_url_for_page(page, request=None):
 
     Returns None if neither the page nor any of its ancestors provide feeds.
     """
-    from v1.models.filterable_list_mixins import FilterableListMixin
+    from v1.models.filterable_list_mixin import FilterableListMixin
 
     ancestors_including_page = page.get_ancestors(inclusive=True)
     ancestors_including_page_with_feeds = ancestors_including_page.filter(

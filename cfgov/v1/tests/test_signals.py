@@ -43,24 +43,11 @@ class FilterableListInvalidationTestCase(TestCase):
         self.non_filterable_page.save()
 
     @mock.patch("v1.signals.AkamaiBackend.purge_by_tags")
-    @mock.patch("v1.signals.cache")
     def test_invalidate_filterable_list_caches(
         self,
-        mock_cache,
         mock_purge,
     ):
         invalidate_filterable_list_caches(None, instance=self.blog_page)
-
-        for cache_key_prefix in (
-            self.filterable_list_page.get_cache_key_prefix(),
-            self.category_filterable_list_page.get_cache_key_prefix(),
-        ):
-            mock_cache.delete.assert_any_call(
-                f"{cache_key_prefix}-all_filterable_results"
-            )
-            mock_cache.delete.assert_any_call(f"{cache_key_prefix}-page_ids")
-            mock_cache.delete.assert_any_call(f"{cache_key_prefix}-topics")
-            mock_cache.delete.assert_any_call(f"{cache_key_prefix}-authors")
 
         mock_purge.assert_called_once()
         self.assertIn(
@@ -68,14 +55,10 @@ class FilterableListInvalidationTestCase(TestCase):
         )
 
     @mock.patch("v1.signals.AkamaiBackend.purge_by_tags")
-    @mock.patch("django.core.cache.cache")
-    def test_invalidate_filterable_list_caches_does_nothing(
-        self, mock_cache, mock_purge
-    ):
+    def test_invalidate_filterable_list_caches_does_nothing(self, mock_purge):
         invalidate_filterable_list_caches(
             None, instance=self.non_filterable_page
         )
-        mock_cache.delete.assert_not_called()
         mock_purge.assert_not_called()
 
 
