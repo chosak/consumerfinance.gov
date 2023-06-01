@@ -192,28 +192,30 @@ class FilterableListForm(forms.Form):
     def order_from_and_to_date_filters(self, cleaned_data):
         from_date = cleaned_data.get("from_date")
         to_date = cleaned_data.get("to_date")
-        # Check if both date_lte and date_gte are present.
+
+        # Check if both from_date and to_date are present.
         # If the 'start' date is after the 'end' date, swap them.
         if (from_date and to_date) and to_date < from_date:
-            data = dict(self.data)
-            data_to_date = data["to_date"]
-            self.cleaned_data["to_date"], data["to_date"] = (
-                from_date,
-                data["from_date"],
-            )
-            self.cleaned_data["from_date"], data["from_date"] = (
-                to_date,
-                data_to_date,
-            )
-            self.data = data
+            self.data = self.data.copy()
+
+            data_to_date = self.data["to_date"]
+            self.cleaned_data["to_date"] = from_date
+            self.data["to_date"] = self.data["from_date"]
+
+            self.cleaned_data["from_date"] = to_date
+            self.data["from_date"] = data_to_date
+
         return self.cleaned_data
 
     def set_interpreted_date_values(self, cleaned_data):
         from_date = cleaned_data.get("from_date")
         to_date = cleaned_data.get("to_date")
+
         # If from_ or to_ is filled in, fill them both with sensible values.
         # If neither is filled in, leave them both blank.
         if from_date or to_date:
+            self.data = self.data.copy()
+
             if from_date:
                 self.data["from_date"] = date.strftime(
                     cleaned_data["from_date"], self.preferred_datetime_format
@@ -221,25 +223,22 @@ class FilterableListForm(forms.Form):
             else:
                 # If there's a 'to_date' and no 'from_date',
                 #  use default_min_date as 'from_date'.
-                cleaned_data["from_date"] = self.default_min_date
+                default_from_date = min(to_date, self.default_min_date)
+                cleaned_data["from_date"] = default_from_date
                 self.data["from_date"] = date.strftime(
-                    self.default_min_date, self.preferred_datetime_format
+                    default_from_date, self.preferred_datetime_format
                 )
 
             if to_date:
-                transformed_to_date = end_of_time_period(
-                    self.data["to_date"], cleaned_data["to_date"]
-                )
-                cleaned_data["to_date"] = transformed_to_date
                 self.data["to_date"] = date.strftime(
-                    transformed_to_date, self.preferred_datetime_format
+                    cleaned_data["to_date"], self.preferred_datetime_format
                 )
             else:
                 # If there's a 'from_date' but no 'to_date', use today's date.
-                today = date.today()
-                cleaned_data["to_date"] = today
+                default_to_date = max(from_date, date.today())
+                cleaned_data["to_date"] = default_to_date
                 self.data["to_date"] = date.strftime(
-                    today, self.preferred_datetime_format
+                    default_to_date, self.preferred_datetime_format
                 )
 
         return cleaned_data
