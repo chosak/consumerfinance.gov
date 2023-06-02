@@ -215,12 +215,11 @@ class FilterableSearchTests(ElasticsearchWagtailPageTreeTestCase):
         # By default search only returns AbstractFilterPages
         # that are direct children of the specified root.
         search = FilterablePagesSearch(self.page_tree[0])
-        results = search.search()
 
-        self.assertEqual(len(results), 2)
-        self.assertIsNone(results.min_start_date)
-        self.assertIsNone(results.language_codes)
-        self.assertIsNone(results.tag_slugs)
+        self.assertEqual(len(search), 2)
+        self.assertIsNone(search.min_start_date)
+        self.assertIsNone(search.language_codes)
+        self.assertIsNone(search.tag_slugs)
 
     def test_search_root_with_aggregates(self):
         search = FilterablePagesSearch(self.page_tree[0])

@@ -1,4 +1,5 @@
 from html import unescape
+from operator import itemgetter
 
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.html import strip_tags
@@ -112,40 +113,77 @@ class FilterablePagesDocument(Document):
 
 
 class FilterablePagesSearch:
-    def __init__(self, root_page, children_only=True, ordering=None):
-        self.root_page = root_page
-        self.children_only = children_only
-        self.ordering = ordering
-
-    def search(
-        self, include_aggregates=False, aggregate_bucket_count=1000, **kwargs
+    def __init__(
+        self,
+        root_page,
+        children_only=True,
+        ordering=None,
+        aggregate_bucket_count=1000,
+        **kwargs,
     ):
-        search = self._get_search(**kwargs)
+        search = self._get_base_search(root_page, children_only)
 
-        if include_aggregates:
-            search = self._add_aggregates(search, aggregate_bucket_count)
+        search = self._filter_search(search, **kwargs)
+
+        search = self._add_search_aggregates(search, aggregate_bucket_count)
+
+        if ordering:
+            search = search.sort(ordering)
 
         # We only care about retrieving the ID field because we're going to
         # query the database to retrieve the full Django models anyway.
         search = search.source(excludes=["*"])
 
-        response = search.execute()
+        self.search = search
+        self.results = None
 
-        # If we included aggregates, verify they were computed properly.
-        if include_aggregates:
-            self._validate_aggregates(response)
+    def __getitem__(self, key):
+        if self.results is None:
+            if isinstance(key, slice):
+                self.search = self.search[key]
+                return self
 
-        return self.SearchResults(response)
+            self._execute()
 
-    def _get_search(self, **kwargs):
-        search = self._get_base_search()
+        return self.results[key]
 
+    def __len__(self):
+        self._execute()
+
+        return sum(
+            map(
+                itemgetter("doc_count"),
+                self.response.aggs.language_codes.buckets,
+            )
+        )
+
+    def _execute(self):
+        if self.results is None:
+            results = self.search.execute()
+            self._validate_search_aggregates(results)
+            self.results = results
+
+    @classmethod
+    def _get_base_search(cls, root_page, children_only):
+        search = FilterablePagesDocument.search()
+
+        search = search.filter("prefix", path=root_page.path)
+
+        if children_only:
+            search = search.filter("term", depth=root_page.depth + 1)
+        else:
+            search = search.filter("range", depth={"gt": root_page.depth})
+
+        return search
+
+    @classmethod
+    def _filter_search(cls, search, **kwargs):
         # Filter by query, if specified.
         # This comes in as kwarg "title" for backwards-compatibility reasons.
-        search = self._query(search, kwargs.get("title"))
+        search = cls._query(search, kwargs.get("title"))
 
         # Add any date-based filtering.
-        search = self._filter_by_date(
+        search = cls._filter_by_date(
             search, kwargs.get("from_date"), kwargs.get("to_date")
         )
 
@@ -158,29 +196,12 @@ class FilterablePagesSearch:
             ("statuses", "statuses"),
             ("products", "products"),
         ):
-            search = self._filter_by_terms(
-                search, filter_by, kwargs.get(kwarg)
-            )
+            search = cls._filter_by_terms(search, filter_by, kwargs.get(kwarg))
 
         return search
 
-    def _get_base_search(self):
-        search = FilterablePagesDocument.search()
-
-        search = search.filter("prefix", path=self.root_page.path)
-
-        if self.children_only:
-            search = search.filter("term", depth=self.root_page.depth + 1)
-        else:
-            search = search.filter("range", depth={"gt": self.root_page.depth})
-
-        if self.ordering:
-            search = search.sort(self.ordering)
-
-        return search
-
-    @staticmethod
-    def _query(search, q):
+    @classmethod
+    def _query(cls, search, q):
         if q:
             query = MultiMatch(
                 query=q,
@@ -200,8 +221,8 @@ class FilterablePagesSearch:
 
         return search
 
-    @staticmethod
-    def _filter_by_date(search, from_date, to_date):
+    @classmethod
+    def _filter_by_date(cls, search, from_date, to_date):
         if from_date and to_date:
             ranges = [
                 {"end_date": {"gte": from_date}},
@@ -219,8 +240,8 @@ class FilterablePagesSearch:
 
         return search
 
-    @staticmethod
-    def _filter_by_terms(search, filter_by, values):
+    @classmethod
+    def _filter_by_terms(cls, search, filter_by, values):
         if values:
             if isinstance(values, str):
                 values = [values]
@@ -229,8 +250,8 @@ class FilterablePagesSearch:
 
         return search
 
-    @staticmethod
-    def _add_aggregates(search, bucket_count):
+    @classmethod
+    def _add_search_aggregates(cls, search, bucket_count):
         # When computing terms bucket aggregates in OpenSearch or Elasticsearch,
         # it's necessary to specify the maximum number of buckets to compute:
         #
@@ -283,36 +304,35 @@ class FilterablePagesSearch:
     class SearchResults:
         def __init__(self, response):
             self.response = response
-            self.queryset = response._search.to_queryset()
 
         def __bool__(self):
             return bool(self.response)
 
         def __len__(self):
-            return len(self.response)
+            return sum(
+                map(
+                    itemgetter("doc_count"),
+                    self.response.aggs.language_codes.buckets,
+                )
+            )
 
         def __getitem__(self, key):
-            return self.queryset[key]
+            self.response = self.response._search[key]
+            return self.response._search[key]
+
+        def to_queryset(self):
+            return self.response.to_queryset()
 
         @property
         def language_codes(self):
-            if not self.response.aggs:
-                return None
-
             return [b.key for b in self.response.aggs.language_codes.buckets]
 
         @property
         def tag_slugs(self):
-            if not self.response.aggs:
-                return None
-
             return [b.key for b in self.response.aggs.tag_slugs.buckets]
 
         @property
         def min_start_date(self):
-            if not self.response.aggs:
-                return None
-
             return (
                 FilterablePagesDocument._fields["start_date"]
                 .deserialize(self.response.aggs.min_start_date.value_as_string)

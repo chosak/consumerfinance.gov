@@ -36,29 +36,27 @@ class FilterableListMixin(ShareableRoutablePageMixin):
         unfiltered_results = search.search(include_aggregates=True)
 
         # By default we show unfiltered results unless they are being filtered.
-        results = unfiltered_results
+        results = self.paginate_results(request, unfiltered_results)
 
         # If there is data to be filtered, create a form to filter it.
-        if unfiltered_results:
-            form = self.get_form(unfiltered_results, request.GET)
+        if results:
+            form = self.get_form(results.object_list, request.GET)
 
             # If any filters are applied, we might need to do another search.
             if form.has_active_filters:
                 if form.is_valid():
-                    results = search.search(**form.cleaned_data)
+                    filtered_results = search.search(**form.cleaned_data)
                 else:
                     # If the form was invalid, we don't show any results.
-                    results = []
+                    filtered_results = []
 
-        # Pull out the appropriate page of results to display and
-        # convert the search results to Wagtail page objects.
-        pages = self.paginate_results(request, results)
+                results = self.paginate_results(request, filtered_results)
 
         context.update(
             {
                 "form": form,
                 "has_unfiltered_results": bool(unfiltered_results),
-                "pages": pages,
+                "pages": results,
             }
         )
 
