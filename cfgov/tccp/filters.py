@@ -25,7 +25,7 @@ class CardOrderingFilter(filters.OrderingFilter):
         if value[0] == "purchase_apr":
             # If we're sorting by purchase APR, we sort by the tier-specific
             # purchase APR that we previously annotated.
-            ordering = ["purchase_apr_for_tier"]
+            ordering = ["purchase_apr_for_sorting"]
         elif value[0] == "transfer_apr":
             # If we're sorting by transfer APR, we want to exclude cards that
             # don't have either a tier-specific APR or a {minimum, maximum}
@@ -34,7 +34,7 @@ class CardOrderingFilter(filters.OrderingFilter):
             qs = qs.exclude(transfer_apr_for_ordering__isnull=True)
 
             # We then order by that column first and purchase APR second.
-            ordering = ["transfer_apr_for_ordering", "purchase_apr_for_tier"]
+            ordering = ["transfer_apr_for_sorting", "purchase_apr_for_sorting"]
 
         # We always specify product name as the fallback ordering.
         return super().filter(qs, ordering + ["product_name"])

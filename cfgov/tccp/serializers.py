@@ -5,10 +5,12 @@ from .models import CardSurveyData
 
 class CardSurveyDataSerializer(serializers.HyperlinkedModelSerializer):
     periodic_fee_type = serializers.JSONField()
-    purchase_apr_for_tier = serializers.FloatField()
-    purchase_apr_for_tier_rating = serializers.IntegerField()
+    purchase_apr_tier_max = serializers.FloatField()
+    purchase_apr_tier_min = serializers.FloatField()
+    purchase_apr_tier_rating = serializers.IntegerField()
     rewards = serializers.JSONField()
-    transfer_apr_for_tier = serializers.FloatField()
+    transfer_apr_tier_max = serializers.FloatField()
+    transfer_apr_tier_min = serializers.FloatField()
 
     class Meta:
         model = CardSurveyData
@@ -16,15 +18,15 @@ class CardSurveyDataSerializer(serializers.HyperlinkedModelSerializer):
             "institution_name",
             "periodic_fee_type",
             "product_name",
-            "purchase_apr_for_tier",
-            "purchase_apr_for_tier_rating",
+            "purchase_apr_tier_max",
+            "purchase_apr_tier_min",
+            "purchase_apr_tier_rating",
             "rewards",
             "secured_card",
             "state_limitations",
             "top_25_institution",
-            "transfer_apr_for_tier",
-            "transfer_apr_min",
-            "transfer_apr_max",
+            "transfer_apr_tier_max",
+            "transfer_apr_tier_min",
             "url",
         ]
         extra_kwargs = {

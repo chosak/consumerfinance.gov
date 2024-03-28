@@ -88,13 +88,16 @@ class CardListView(FlaggedViewMixin, ListAPIView):
 
     def list(self, request, *args, **kwargs):
         render_format = request.accepted_renderer.format
+
         queryset = self.get_queryset()
         summary_stats = queryset.get_summary_statistics()
-        filter_backend = self.filter_backends[0](summary_stats)
+        unfiltered_queryset = queryset.with_ratings(summary_stats)
+
+        filter_backend = self.filter_backends[0]()
 
         try:
             filtered_queryset = filter_backend.filter_queryset(
-                request, queryset, self
+                request, unfiltered_queryset, self
             )
         except ValidationError:
             # A ValidationError may occur if the user input is invalid.

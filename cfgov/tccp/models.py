@@ -40,84 +40,188 @@ class CardSurveyDataQuerySet(models.QuerySet):
 
         return self.filter(q)
 
-    def for_credit_tier(self, credit_tier, summary_stats=None):
+    def with_ratings(self, summary_stats=None):
         qs = self
 
-        # While filtering by the specified credit tier we can also annotate the
-        # queryset with some new column aliases that make it easier to sort by,
-        # filter by, and display APRs.
-        #
-        # For example, each card has columns purchase_apr_poor,
-        # purchase_apr_good, and purchase_apr_great. We want to be able to
-        # easily sort by, filter by, and display a card's purchase APR, based
-        # on the tier being filtered. So we define a new alias column simply
-        # named purchase_apr_for_tier which we can use for this purpose.
-        #
-        # We similarly define transfer_apr_for_tier.
-        tier_column_suffix = dict(enums.CreditTierColumns)[credit_tier]
+        # Card ratings are based on how a card's purchase APR relates to the
+        # distribution of purchase APRs across other cards for that credit
+        # tier. This computation relies on summary statistics for the entire
+        # card dataset. If we haven't previously computed those stats, we need
+        # to do so now.
+        summary_stats = summary_stats or qs.get_summary_statistics()
 
+        # For each card, we annotate six additional columns:
+        #
+        # purchase_apr_poor_for_sorting
+        # purchase_apr_good_for_sorting
+        # purchase_apr_great_for_sorting
+        # transfer_apr_poor_for_sorting
+        # transfer_apr_good_for_sorting
+        # transfer_apr_great_for_sorting
+        #
+        # We want to select the most appropriate APR to use for both purchase
+        # APR and transfer APR for each of the three credit tiers: poor, good,
+        # and great. We need a single APR for each of these so that we can both
+        # sort cards by APR (purchase or transfer) and also rate cards by APR
+        # (purchase only, see code further down below).
+        #
+        # Note that we only include a card in a certain tier if it both has a
+        # valid APR for that tier AND if its "targeted_credit_tiers" column
+        # includes the tier in its value. It's not enough that a card offers an
+        # APR to the tier; it also has to be "targeted" to that tier.
+        #
+        # Given the above, the logic for choosing which APR to use works as
+        # follows, using the purchase APR and the good tier as an example:
+        #
+        # 1. If the column "targeted_credit_tiers" column doesn't include the
+        #    good tier, use an APR of None.
+        # 2. Otherwise, if the column "purchase_apr_good" is defined, use it.
+        # 2. Otherwise, if both columns "purchase_apr_min" and
+        #    "purchase_apr_max" are defined, used "purchase_apr_min".
+        # 3. Otherwise, if the column "purchase_apr_median" is defined, use it.
+        # 4. Otherwise, use an APR of None.
+        #
+        # This logic can be represented in SQL roughly as:
+        #
+        # SELECT
+        #   *,
+        #   CASE
+        #     WHEN
+        #       targeted_credit_tiers @> ["Credit score 619 or less"]
+        #     THEN
+        #       COALESCE(
+        #         purchase_apr_good,
+        #         CASE
+        #           WHEN
+        #             purchase_apr_min IS NOT NULL AND
+        #             purchase_apr_max IS NOT NULL
+        #           THEN
+        #             purchase_apr_min,
+        #           ELSE NULL
+        #         END,
+        #         purchase_apr_median
+        #       )
+        #     ELSE NULL
+        #   END AS purchase_apr_good_for_sorting
+        # FROM ...;
+        #
+        # This logic is expressed in Django code here:
         qs = qs.annotate(
             **{
-                f"{basename}_apr_for_tier": F(
-                    f"{basename}_apr_{tier_column_suffix}"
+                f"{apr}_apr_{tier_column_suffix}_for_sorting": Case(
+                    When(
+                        targeted_credit_tiers__contains=tier_value,
+                        then=Coalesce(
+                            F(f"{apr}_apr_{tier_column_suffix}"),
+                            Case(
+                                When(
+                                    Q(**{f"{apr}_apr_min__isnull": False})
+                                    & Q(**{f"{apr}_apr_max__isnull": False}),
+                                    then=F(f"{apr}_apr_min"),
+                                ),
+                                default=Value(None),
+                            ),
+                            F(f"{apr}_apr_median"),
+                        ),
+                    ),
+                    default=Value(None),
+                    output_field=models.FloatField(),
                 )
-                for basename in ("purchase", "transfer")
+                for apr, (tier_value, tier_column_suffix) in product(
+                    ("purchase", "transfer"), enums.CreditTierColumns
+                )
             }
         )
 
-        # We also want to define a transfer_apr_for_ordering so that we can
-        # sort either by transfer_apr_for_tier or transfer_apr_min, depending
-        # on whether those columns is defined.
-        qs = qs.annotate(
-            transfer_apr_for_ordering=Coalesce(
-                "transfer_apr_for_tier", "transfer_apr_min"
-            )
-        )
-
-        # We exclude cards that don't have a purchase APR for this tier.
-        qs = qs.exclude(purchase_apr_for_tier__isnull=True)
-
-        # We also exclude those cards that aren't "specifically targeted" for
-        # this tier.
-        qs = qs.filter(targeted_credit_tiers__contains=credit_tier)
-
-        # Finally, we want to annotate each card with a rating based on how
-        # its purchase APR compares with other cards within the same tier.
+        # We additionally annotate these three columns:
         #
-        # We annotate a new column named purchase_apr_for_tier_rating as:
+        # purchase_apr_poor_rating
+        # purchase_apr_good_rating
+        # purchase_apr_great_rating
+        #
+        # These are computed by comparing the three purchase APR columns
+        # added above (purchase_apr_{poor, good, great}_for_sorting) with the
+        # tier-specific percentiles passed in (or computed) above. Ratings are
+        # assigned as:
         #
         #   purchase APR < 25th percentile: 0
         #   purchase APR < 50th percentile: 1
-        #   else: 2
-
-        # If we've already computed the stats, we can avoid having to do so
-        # again.
-        summary_stats = summary_stats or qs.get_summary_statistics()
+        #   purchase APR >= 50th percentile: 2
+        #   null purchase APR: null
+        #
+        # This logic can be represented in SQL roughly as:
+        #
+        # SELECT
 
         # The "or 0"s below are necessary because it's possible that the
         # percentile might have been computed as None, if there are no cards
         # for this tier. This won't happen with real datasets but could happen
         # when testing this code with empty or minimal datasets.
         qs = qs.annotate(
-            purchase_apr_for_tier_rating=Case(
-                When(
-                    purchase_apr_for_tier__lt=summary_stats[
-                        f"purchase_apr_{tier_column_suffix}_pct25"
-                    ]
-                    or 0,
-                    then=Value(0),
-                ),
-                When(
-                    purchase_apr_for_tier__lt=summary_stats[
-                        f"purchase_apr_{tier_column_suffix}_pct50"
-                    ]
-                    or 0,
-                    then=Value(1),
-                ),
-                default=Value(2),
-                output_field=models.IntegerField(),
-            )
+            **{
+                f"purchase_apr_{tier_column_suffix}_rating": Case(
+                    When(
+                        **{
+                            f"purchase_apr_{tier_column_suffix}__lt": summary_stats[
+                                f"purchase_apr_{tier_column_suffix}_pct25"
+                            ]
+                            or 0
+                        },
+                        then=Value(0),
+                    ),
+                    When(
+                        **{
+                            f"purchase_apr_{tier_column_suffix}__lt": summary_stats[
+                                f"purchase_apr_{tier_column_suffix}_pct50"
+                            ]
+                            or 0
+                        },
+                        then=Value(1),
+                    ),
+                    When(
+                            **{
+                            f"purchase_apr_{tier_column_suffix}__lte": summary_stats[
+                                f"purchase_apr_{tier_column_suffix}_max"
+                            ]
+                            or 0
+                        },
+                        then=Value(2),
+                    )
+                    default=Value(None),
+                    output_field=models.IntegerField()
+                )
+                for tier_column_suffix in dict(
+                    enums.CreditTierColumns
+                ).values()
+            }
         )
+
+        return qs
+
+    def for_credit_tier(self, credit_tier):
+        qs = self
+
+        tier_column_suffix = dict(enums.CreditTierColumns)[credit_tier]
+
+        qs = qs.annotate(
+            **{
+                f"{basename}_apr_for_sorting": F(
+                    f"{basename}_apr_{tier_column_suffix}_for_sorting"
+                )
+                for basename in ("purchase", "transfer")
+            }
+        )
+
+        qs = qs.annotate(
+            purchase_apr_rating=F(f"purchase_apr_{tier_column_suffix}_rating")
+        )
+
+                    "purchase_apr_tier_max",
+            "purchase_apr_tier_min",
+            "purchase_apr_tier_rating",
+
+        # We exclude cards that don't have a purchase APR for this tier.
+        qs = qs.exclude(purchase_apr_for_sorting__isnull=True)
 
         return qs
 
