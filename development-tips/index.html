@@ -8,7 +8,7 @@
     <title>Development Tips - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -77,6 +76,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
@@ -86,6 +87,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -158,16 +161,15 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Contributing &raquo;</li><li>Development Tips</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Contributing</li>
+      <li class="breadcrumb-item active">Development Tips</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/development-tips.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/development-tips.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -183,9 +185,9 @@ Feel free to <a href="https://editorconfig.org/#download">install a plugin</a> f
 <code>cfgov/unprocessed</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>After running <code>yarn build</code> (or <code>./setup.sh</code>) the site's assets are copied over to <code>cfgov/static_built</code>,
 ready to be served by Django.</p>
+</div>
 <h2 id="adding-new-javascript-entrypoints">Adding new Javascript entrypoints<a class="headerlink" href="#adding-new-javascript-entrypoints" title="Permanent link">¶</a></h2>
 <ul>
 <li>In order to build standalone javascript files that are to be included in a template, they
@@ -236,10 +238,10 @@ dependencies. These projects have their own <code>package.json</code> and base t
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>A template may support a non-standard browser, like an older IE version,
 by including the required dependencies, polyfills, etc. in its
 template's <code>{% block css %}</code> or <code>{% block javascript scoped %}</code> blocks.</p>
+</div>
               
             </div>
           </div><footer>
@@ -279,14 +281,15 @@ template's <code>{% block css %}</code> or <code>{% block javascript scoped %}</
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

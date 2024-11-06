@@ -8,7 +8,7 @@
     <title>Artifacts and Deployment - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -85,6 +84,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
@@ -94,6 +95,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -146,16 +149,15 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Running this Project &raquo;</li><li>Artifacts and Deployment</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Running this Project</li>
+      <li class="breadcrumb-item active">Artifacts and Deployment</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/deployment.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/deployment.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -163,11 +165,11 @@
 of the code and all of its Python dependencies. We use these
 archives to deploy the site to a Linux server.</p>
 <h1 id="generating-a-deployment-artifact">Generating a deployment artifact<a class="headerlink" href="#generating-a-deployment-artifact" title="Permanent link">¶</a></h1>
-<p>Running the script at <code>./docker/deployable-zipfile/build.sh</code> will start a CentOS 6
+<p>Running the script at <code>./docker/builder/build.sh</code> will start a CentOS 7
 container, generate the artifact (via
-<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/docker/deployable-zipfile/_build.sh">this script</a>),
+<a href="https://github.com/cfpb/consumerfinance.gov/blob/main/docker/builder/_build.sh">this script</a>),
 and save it to <code>./cfgov_current_build.zip</code>.</p>
-<p>We use CentOS 6 here, so that the Python modules that include compiled code, will
+<p>We use CentOS 7 here so that the Python modules that include compiled code, will
 be compiled for the same environment they will be run in.</p>
 <h1 id="whats-in-an-artifact">What's in an artifact?<a class="headerlink" href="#whats-in-an-artifact" title="Permanent link">¶</a></h1>
 <p>Here's a (very abbreviated) peek into what's <em>in</em> the zip file:</p>
@@ -181,7 +183,7 @@ wheels/tqdm-4.15.0-py2.py3-none-any.whl
 ...
 static.in/0/
 static.in/0/fonts/
-static.in/0/fonts/8344e877-560d-44d4-82eb-9822766676f9.woff
+static.in/0/fonts/2cd55546-ec00-4af9-aeca-4a3cd186da53.woff2
 ...
 bootstrap_wheels/setuptools-41.2.0-py2.py3-none-any.whl
 bootstrap_wheels/pip-19.2.3-py2.py3-none-any.whl
@@ -251,14 +253,15 @@ If we ignore some specifics and quirks of our environment, the basic steps look 
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

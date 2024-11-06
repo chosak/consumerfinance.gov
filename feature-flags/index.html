@@ -8,7 +8,7 @@
     <title>Feature Flags - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -77,6 +76,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Feature Flags</a>
@@ -104,6 +105,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -156,16 +159,15 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Supporting Features &raquo;</li><li>Feature Flags</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Supporting Features</li>
+      <li class="breadcrumb-item active">Feature Flags</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/feature-flags.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/feature-flags.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -205,17 +207,15 @@
 <p><code>flag_enabled('MY_FLAG')</code> will return <code>True</code> if the conditions under which <code>MY_FLAG</code> is enabled <strong>are</strong> met.</p>
 <p><code>flag_disabled('MY_FLAG')</code> will return <code>True</code> if the conditions under which <code>MY_FLAG</code> is enabled <strong>are not</strong> met.</p>
 <p>See <a href="#enabling-a-flag">Enabling a flag</a> below for more on flag conditions.</p>
-<p>An example is <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/jinja2/v1/_includes/organisms/header.html#L28-L41">the <code>BETA_NOTICE flag</code> as implemented in <code>header.html</code></a>:</p>
+<p>An example is <a href="https://github.com/cfpb/consumerfinance.gov/blob/d4879552d353198de4f24dd385fe8a48c04448d7/cfgov/v1/jinja2/v1/includes/organisms/header.html#L25-L38">the <code>BETA_NOTICE flag</code> as implemented in <code>header.html</code></a>:</p>
 <pre class="highlight"><code class="language-jinja">{% if flag_enabled('BETA_NOTICE') %}
-&lt;div class="m-global-banner"&gt;
+&lt;div class="o-banner"&gt;
     &lt;div class="wrapper
-                wrapper__match-content
-                o-expandable
-                o-expandable__expanded"&gt;
-        &lt;div class="m-global-banner_head"&gt;
-            &lt;span class="cf-icon
-                         cf-icon-error-round
-                         m-global-banner_icon"&gt;&lt;/span&gt;
+                wrapper--match-content"&gt;
+        &lt;div class="m-notification
+                    m-notification--warning
+                    m-notification--visible"&gt;
+            …
             This beta site is a work in progress.
         &lt;/div&gt;
         …
@@ -232,15 +232,13 @@
 
 {% flag_enabled 'BETA_NOTICE' as beta_flag %}
 {% if beta_flag %}
-&lt;div class="m-global-banner"&gt;
+&lt;div class="o-banner"&gt;
     &lt;div class="wrapper
-                wrapper__match-content
-                o-expandable
-                o-expandable__expanded"&gt;
-        &lt;div class="m-global-banner_head"&gt;
-            &lt;span class="cf-icon
-                         cf-icon-error-round
-                         m-global-banner_icon"&gt;&lt;/span&gt;
+                wrapper--match-content"&gt;
+        &lt;div class="m-notification
+                    m-notification--warning
+                    m-notification--visible"&gt;
+            …
             This beta site is a work in progress.
         &lt;/div&gt;
         …
@@ -362,14 +360,15 @@ urlpatterns += ask_patterns</code></pre>
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

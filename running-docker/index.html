@@ -8,7 +8,7 @@
     <title>Running in Docker - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -103,6 +102,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
@@ -112,6 +113,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -164,16 +167,15 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Running this Project &raquo;</li><li>Running in Docker</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Running this Project</li>
+      <li class="breadcrumb-item active">Running in Docker</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/running-docker.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/running-docker.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -183,8 +185,7 @@
 to setup your Docker environment and create the project Docker containers.</p>
 <p>We use <a href="https://docs.docker.com/compose/reference/overview/"><code>docker-compose</code></a>
 to run an Elasticsearch container, a PostgreSQL container,
-and Django in a Python container.
-There is also a container serving the documentation.</p>
+and Django in a Python container.</p>
 <p>All of these containers are configured in our
 <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/docker-compose.yml"><code>docker-compose.yml</code> file</a>.
 See the <a href="https://docs.docker.com/compose/compose-file/">Docker documentation</a>
@@ -193,7 +194,6 @@ for more about the format and use of this file.</p>
 <ul>
 <li>Access consumerfinance.gov running in the Python container: <a href="http://localhost:8000/">http://localhost:8000/</a></li>
 <li>Access Elasticsearch: <a href="http://localhost:9200/">http://localhost:9200/</a></li>
-<li>View this documentation: <a href="http://localhost:8888/">http://localhost:8888/</a></li>
 </ul>
 <p>To build and run the containers for the first time, run:</p>
 <pre class="highlight"><code class="language-bash">docker network create cfgov
@@ -246,15 +246,15 @@ you can run <a href="https://docs.docker.com/engine/reference/commandline/attach
 <p>When you're done, you can detach with <code>Ctrl+P Ctrl+Q</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p><code>docker attach</code> takes the specific container name or ID.
 Yours may or may not be <code>consumerfinancegov_python_1</code>.
 To verify, use <code>docker container ls</code>
 to get the Python container's full name or ID.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p><code>docker attach</code> will ONLY work with the dev image, not prod (apache).</p>
+</div>
 <h2 id="useful-docker-commands">Useful Docker commands<a class="headerlink" href="#useful-docker-commands" title="Permanent link">¶</a></h2>
 <p>For <code>docker-compose</code> commands,
 <code>[SERVICE]</code> is the service name that is defined in <code>docker-compose.yml</code>.</p>
@@ -386,14 +386,15 @@ This dramatically improves the overall final image size.</p>
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

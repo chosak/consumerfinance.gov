@@ -8,7 +8,7 @@
     <title>Caching - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -77,14 +76,14 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Caching</a>
     <ul class="current">
     
         <ul>
         
             <li><a class="toctree-l4" href="#akamai">Akamai</a></li>
-        
-            <li><a class="toctree-l4" href="#django-caching">Django caching</a></li>
         
         </ul>
     
@@ -98,6 +97,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -150,22 +151,21 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Supporting Features &raquo;</li><li>Caching</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Supporting Features</li>
+      <li class="breadcrumb-item active">Caching</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/caching.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/caching.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
                 <h1 id="caching">Caching<a class="headerlink" href="#caching" title="Permanent link">¶</a></h1>
 <h3 id="akamai">Akamai<a class="headerlink" href="#akamai" title="Permanent link">¶</a></h3>
-<p>We use <a href="https://www.akamai.com/">Akamai</a>, a content delivery network, to cache the entirety of <a href="https://www.consumerfinance.gov/">www.consumerfinance.gov</a> (but not our development servers). We invalidate any given page in Wagtail when it is published or unpublished (by hooking up the custom class <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/models/akamai_backend.py"><code>AkamaiBackend</code></a> to <a href="http://docs.wagtail.io/en/v2.0.1/reference/contrib/frontendcache.html">Wagtail's frontend cache invalidator</a>. By default, we clear the Akamai cache any time we deploy.</p>
+<p>We use <a href="https://www.akamai.com/">Akamai</a>, a content delivery network, to cache the entirety of <a href="https://www.consumerfinance.gov/">www.consumerfinance.gov</a> (but not our development servers). We invalidate any given page in Wagtail when it is published or unpublished (by hooking up the custom class <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/cdntools/backends.py"><code>AkamaiBackend</code></a> to <a href="http://docs.wagtail.io/en/v2.0.1/reference/contrib/frontendcache.html">Wagtail's frontend cache invalidator</a>.</p>
 <p>There are certain pages that do not live in Wagtail or are impacted by changes on another page (imagine our <a href="https://www.consumerfinance.gov/about-us/newsroom/">newsroom page</a> that lists titles of other pages) or another process (imagine data from Socrata gets updated) and thus will display outdated content until the page's time to live (TTL) has expired, a deploy has happened, or if someone manually invalidates that page. Our default TTL is 24 hours.</p>
 <h4 id="checking-the-cache-state-of-a-url">Checking the cache state of a URL<a class="headerlink" href="#checking-the-cache-state-of-a-url" title="Permanent link">¶</a></h4>
 <p>To get the current cache state of a URL (perhaps to see if that URL has been invalidated), you can use the following <code>curl</code> command to check the <code>X-Cache</code> header:</p>
@@ -185,21 +185,11 @@
 <li><code>TCP_DENIED</code>: Denied access to the client for whatever reason.</li>
 <li><code>TCP_COOKIE_DENY</code>: Denied access on cookie authentication (if centralized or decentralized authorization feature is being used in config).</li>
 </ul>
-<h3 id="django-caching">Django caching<a class="headerlink" href="#django-caching" title="Permanent link">¶</a></h3>
-<p>Starting in December 2017, we use <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/jinja2tags/fragment_cache.py">template fragment caching</a> to cache all or part of a template. It is enabled on our "post previews", snippets of a page that we display on results of filterable pages (e.g. <a href="https://consumerfinance.gov/about-us/blog">our blog page</a> &amp; <a href="https://www.consumerfinance.gov/data-research/research-reports/">research &amp; reports</a>).</p>
-<p>It can easily be enabled on other templates. See <a href="https://github.com/cfpb/consumerfinance.gov/pull/3663/files">this PR</a> as an example of the code that would need to be introduced to cache a new fragment.</p>
-<p>When a page gets published, it will update the post preview cache for that particular page. However, if there are code changes that impact the page's content, or the post preview template itself gets updated, the entire post preview cache will need to be manually cleared. Clearing this particular cache could be an option when deploying, as it is with Akamai, but should not be a default since most deploys wouldn't impact the code in question. Currently, the manual way to do this would be to run the following from a production server's django shell:</p>
-<pre class="highlight"><code>from django.core.cache import caches
-
-caches['post_preview'].clear()</code></pre>
-<p>To run the application locally with caching for post previews enabled, run <code>ENABLE_POST_PREVIEW_CACHE=1 ./runserver.sh</code>
-Alternatively, add this variable to your <code>.env</code> if you generally want it enabled locally.</p>
-<p>Due to the impossibility/difficulty/complexity of caching individual Wagtail blocks (they are not serializable) and invalidating content that does not have some type of <code>post_save</code> hook (e.g. Taggit models), we have started with caching segments that are tied to a Wagtail page (which can be easily invalidated using the <code>page_published</code> Wagtail signal), hence the post previews. With more research or improvements to these third-party libraries, it is possible we could expand Django-level caching to more content.</p>
               
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../wagtail-pages/" class="btn btn-neutral float-left" title="Wagtail Pages"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../browser-support/" class="btn btn-neutral float-left" title="Browser Support"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../feature-flags/" class="btn btn-neutral float-right" title="Feature Flags">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -227,21 +217,22 @@ Alternatively, add this variable to your <code>.env</code> if you generally want
         </span>
     
     
-      <span><a href="../wagtail-pages/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../browser-support/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../feature-flags/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

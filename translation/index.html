@@ -8,7 +8,7 @@
     <title>Translation - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -77,6 +76,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
@@ -86,6 +87,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1 current"><a class="reference internal current" href="./">Translation</a>
     <ul class="current">
@@ -154,21 +157,20 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Supporting Features &raquo;</li><li>Translation</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Supporting Features</li>
+      <li class="breadcrumb-item active">Translation</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/translation.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/translation.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
                 <h1 id="translation">Translation<a class="headerlink" href="#translation" title="Permanent link">¶</a></h1>
-<p>As consumerfinance.gov is a Django project, the <a href="https://docs.djangoproject.com/en/1.11/topics/i18n/translation/">Django translation documentation is a good place to start</a>. What follows is a brief introduction to translations with the particular tools consumerfinance.gov uses (like Jinja2 templates) and the conventions we use.</p>
+<p>As consumerfinance.gov is a Django project, the <a href="https://docs.djangoproject.com/en/stable/topics/i18n/translation/">Django translation documentation is a good place to start</a>. What follows is a brief introduction to translations with the particular tools consumerfinance.gov uses (like Jinja2 templates) and the conventions we use.</p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">¶</a></h2>
 <p>Django translations use <a href="https://en.wikipedia.org/wiki/Gettext">GNU gettext</a> (see
 <a href="../installation/#install-gnu-gettext-for-django-translation-support">the installation instructions</a>).</p>
@@ -187,7 +189,7 @@ msgstr "Esta es una cadena traducible."</code></pre>
 <p>In Django templates:</p>
 <pre class="highlight"><code class="language-django">{% load i18n %}
 
-{% trans "Hello World!" %}</code></pre>
+{% translate "Hello World!" %}</code></pre>
 <p>In Python code:</p>
 <pre class="highlight"><code class="language-python">from django.utils.translation import gettext as _
 
@@ -204,21 +206,21 @@ mystring = _("Hello World!")</code></pre>
 <p>Using <code>--ignore=tests</code> will ignore any calls to gettext inside our unit tests.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-</div>
 <p>If you're generating all languages, this will create <code>django.po</code> files in all our apps with translations. Please do not commit <code>django.po</code> and <code>django.mo</code> files for apps you have not editted.</p>
+</div>
 <h4 id="3-edit-the-portable-object-file-to-add-a-translation-for-the-string">3. Edit the portable object file to add a translation for the string<a class="headerlink" href="#3-edit-the-portable-object-file-to-add-a-translation-for-the-string" title="Permanent link">¶</a></h4>
 <p>The portable object files are stored in <code>[APP]/locale/[LANGUAGE]/LC_MESSAGES/</code>. For the Spanish portable object file, edit <code>[APP]/locale/es/LC_MESSAGES/django.po</code> and add the Spanish translation as the <code>msgstr</code> for your new <code>msgid</code></p>
 <pre class="highlight"><code class="language-po">msgid "Hello World!"
 msgstr "Hola Mundo!"</code></pre>
 <h4 id="4-run-the-compilemessages-management-command-to-compile-the-machine-object-file">4. Run the <code>compilemessages</code> management command to compile the machine object file<a class="headerlink" href="#4-run-the-compilemessages-management-command-to-compile-the-machine-object-file" title="Permanent link">¶</a></h4>
 <pre class="highlight"><code class="language-shell">cd cfgov
-django-admin.py compilemessages</code></pre>
+django-admin compilemessages</code></pre>
 <h2 id="wagtail-considerations">Wagtail Considerations<a class="headerlink" href="#wagtail-considerations" title="Permanent link">¶</a></h2>
 <p>All of our Wagtail pages include a language-selection dropdown under its Configuration tab:</p>
 <p><img alt="Wagtail page language selection" src="../img/wagtail-language.png" /></p>
 <p>The selected language will force translation of all translatable strings in templates and code for that page.</p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">¶</a></h2>
-<p>To ensure that strings in templates are picked up in message extraction (<code>django-admin.py makemessages</code>), it also helps to know that the way <code>makemessages</code> works.</p>
+<p>To ensure that strings in templates are picked up in message extraction (<code>django-admin makemessages</code>), it also helps to know that the way <code>makemessages</code> works.</p>
 <p><code>makemessages</code> converts all Django <code>{% translate %}</code>, <code>{% blocktranslate %}</code>, and Jinja2 <code>{% trans %}</code> tags into <code>_(…)</code> gettext calls and then to have <a href="https://www.gnu.org/software/gettext/manual/gettext.html"><code>xgettext</code></a> process the files as if they were Python. This process <em>does not</em> work the same as general template parsing, and it means that it's best to make the translatable strings as discoverable as possible.</p>
 <p>There are a few things to avoid to make sure the strings are picked up by <code>makemessages</code>:</p>
 <h4 id="do-not-include-the-_-call-in-a-larger-jinja2-template-data-structure">Do not include the <code>_()</code> call in a larger Jinja2 template data structure:<a class="headerlink" href="#do-not-include-the-_-call-in-a-larger-jinja2-template-data-structure" title="Permanent link">¶</a></h4>
@@ -234,9 +236,9 @@ django-admin.py compilemessages</code></pre>
 <h4 id="do-not-use-f-strings-in-python-calls-to-gettext">Do not use f-strings in Python calls to gettext:<a class="headerlink" href="#do-not-use-f-strings-in-python-calls-to-gettext" title="Permanent link">¶</a></h4>
 <pre class="highlight"><code class="language-diff">- _(f"Hello {world_name}")
 + _("Hello %(world_name)s" % {'world_name': world_name})</code></pre>
-<p>Django's documentation <a href="https://docs.djangoproject.com/en/2.2/topics/i18n/translation/#standard-translation">has some additional information on the limitations of translatable strings and gettext</a>.</p>
-<h4 id="do-mark-variable-strings-for-translation-with-gettext_noop">Do mark variable strings for translation with <a href="https://docs.djangoproject.com/en/3.1/topics/i18n/translation/#marking-strings-as-no-op"><code>gettext_noop</code></a><a class="headerlink" href="#do-mark-variable-strings-for-translation-with-gettext_noop" title="Permanent link">¶</a></h4>
-<p>If you have a variable that will be translated in a template later using the variable name, but you need to mark it for translation so that <code>makemessages</code> will pick it up, use Django's <a href="https://docs.djangoproject.com/en/3.1/topics/i18n/translation/#marking-strings-as-no-op"><code>gettext_noop</code></a>:</p>
+<p>Django's documentation <a href="https://docs.djangoproject.com/en/stable/topics/i18n/translation/#standard-translation">has some additional information on the limitations of translatable strings and gettext</a>.</p>
+<h4 id="do-mark-variable-strings-for-translation-with-gettext_noop">Do mark variable strings for translation with <a href="https://docs.djangoproject.com/en/stable/topics/i18n/translation/#marking-strings-as-no-op"><code>gettext_noop</code></a><a class="headerlink" href="#do-mark-variable-strings-for-translation-with-gettext_noop" title="Permanent link">¶</a></h4>
+<p>If you have a variable that will be translated in a template later using the variable name, but you need to mark it for translation so that <code>makemessages</code> will pick it up, use Django's <a href="https://docs.djangoproject.com/en/stable/topics/i18n/translation/#marking-strings-as-no-op"><code>gettext_noop</code></a>:</p>
 <pre class="highlight"><code class="language-python">from django.utils.translation import gettext_noop
 
 mystring = gettext_noop("Hello World!")</code></pre>
@@ -249,7 +251,7 @@ mystring = gettext_noop("Hello World!")</code></pre>
             </div>
           </div><footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
-        <a href="../site-search/" class="btn btn-neutral float-left" title="Site Search"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../sso/" class="btn btn-neutral float-left" title="Single Sign-On"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../javascript-unit-tests/" class="btn btn-neutral float-right" title="JavaScript Unit Testing">Next <span class="icon icon-circle-arrow-right"></span></a>
     </div>
 
@@ -277,21 +279,22 @@ mystring = gettext_noop("Hello World!")</code></pre>
         </span>
     
     
-      <span><a href="../site-search/" style="color: #fcfcfc">&laquo; Previous</a></span>
+      <span><a href="../sso/" style="color: #fcfcfc">&laquo; Previous</a></span>
     
     
       <span><a href="../javascript-unit-tests/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

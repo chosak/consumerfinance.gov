@@ -8,7 +8,7 @@
     <title>Filterable Lists - consumerfinance.gov</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../css/overrides.css" rel="stylesheet" />
     
       <script>
@@ -18,12 +18,11 @@
         var mkdocs_page_url = null;
       </script>
     
-    <script src="../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -35,7 +34,7 @@
           <a href=".." class="icon icon-home"> consumerfinance.gov
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
-      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
@@ -77,6 +76,8 @@
               </ul>
               <p class="caption"><span class="caption-text">Supporting Features</span></p>
               <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../browser-support/">Browser Support</a>
+                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../caching/">Caching</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../feature-flags/">Feature Flags</a>
@@ -96,6 +97,8 @@
                   <li class="toctree-l1"><a class="reference internal" href="../page-search/">Page Search</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../site-search/">Site Search</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sso/">Single Sign-On</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../translation/">Translation</a>
                   </li>
@@ -148,16 +151,15 @@
       <div class="wy-nav-content">
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href=".." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Supporting Features &raquo;</li><li>Filterable Lists</li>
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Supporting Features</li>
+      <li class="breadcrumb-item active">Filterable Lists</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/filterable-lists.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/cfpb/consumerfinance.gov/edit/master/docs/filterable-lists.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -165,8 +167,7 @@
 <p>In order to provide a broad, configurable search and filtering interface across areas of our site, we have implemented a custom StreamField block, <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/atomic_elements/organisms.py#L802">FilterableList</a>, that allows a user to specify what filters are available, how to order results, and which pages should be included in the search.</p>
 <ul>
 <li><a href="#how-it-works">How It Works</a></li>
-<li><a href="#filterablelistmixin">FilterableListMixin</a></li>
-<li><a href="#categoryfilterablemixin">CategoryFilterableMixin</a></li>
+<li><a href="#abstractfilterablepage">AbstractFilterablePage</a></li>
 <li><a href="#forms">Forms</a></li>
 <li><a href="#filterablelistform">FilterableListForm</a></li>
 <li><a href="#enforcementactionsfilterform">EnforcementActionsFilterForm</a></li>
@@ -178,15 +179,14 @@
 <li><a href="#enforcementactionfilterablepagesdocumentsearch">EnforcementActionFilterablePagesDocumentSearch</a></li>
 </ul>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h2>
-<p>The journey on how a page gets a filterable form is not necessarily a straight or simple path, but it is something that is important to know. To start, the page must support the <code>FilterableList</code> block within a StreamField as we mentioned earlier, but from there we start to see some divergence. In order to utilize the <code>FilterableList</code> the page must support one of the following two classes: <code>FilterableListMixin</code> or <code>CategoryFilterableMixin</code>.</p>
-<h3 id="filterablelistmixin">FilterableListMixin<a class="headerlink" href="#filterablelistmixin" title="Permanent link">¶</a></h3>
-<p>The more common mixin that pages will extend is the <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/models/filterable_list_mixins.py#L15">FilterableListMixin</a>. This class defines several important methods, such as <code>get_form_class</code>, which defines the form to use. We also have some methods that retrieve relevant information for the form to use, such as <code>get_filterable_list_wagtail_block</code>, <code>get_filterable_root</code>, and <code>get_filterable_queryset</code>. The bulk of the work is done in the <code>get_context</code> method, which is responsible for getting and populating the form, processing the form, and returning the results to the user.</p>
-<h3 id="categoryfilterablemixin">CategoryFilterableMixin<a class="headerlink" href="#categoryfilterablemixin" title="Permanent link">¶</a></h3>
-<p>The <a href="https://github.com/cfpb/consumerfinance.gov/blob/main/cfgov/v1/models/filterable_list_mixins.py#L199">CategoryFilterableMixin</a> is an extension of the base <code>FilterableListMixin</code> that exposes some new functionality. It modifies how <code>get_filterable_queryset</code> operates in that it gets an initial list of pages but limits them to only ones that are assigned a category within a set of initial categories, which is defined as the variable <code>filterable_categories</code> on a given page model. We can see this in action with both Newsroom (<code>NewsroomLandingPage</code>) and Recent Updates (<code>ActivityLogPage</code>) pages.</p>
+<p>The journey on how a page gets a filterable form is not necessarily a straight or simple path, but it is something that is important to know. The page class must both support the <code>FilterableList</code> block within its content StreamField and must also inherit from <code>AbstractFilterablePage</code>.</p>
+<h3 id="abstractfilterablepage">AbstractFilterablePage<a class="headerlink" href="#abstractfilterablepage" title="Permanent link">¶</a></h3>
+<p>Pges must extend from the <code>AbstractFilterablePage</code> class. This class defines several important methods, such as <code>get_form_class</code>, which defines the form to use. We also have some methods that retrieve relevant information for the form to use, such as <code>get_filterable_root</code> and <code>get_filterable_queryset</code>. The bulk of the work is done in the <code>get_context</code> method, which is responsible for getting and populating the form, processing the form, and returning the results to the user.</p>
+<p>Page classes may optionally define <code>filterable_categories</code> as a list of categories used to limit search results. We can see this in action with both Newsroom (<code>NewsroomLandingPage</code>) and Recent Updates (<code>ActivityLogPage</code>) pages.</p>
 <h3 id="forms">Forms<a class="headerlink" href="#forms" title="Permanent link">¶</a></h3>
 <p>As of our initial release of Elasticsearch-backed filterable lists in March 2021, our filterable forms can be broken into three specific forms: <code>FilterableListForm</code>, <code>EnforcementActionsFilterableListForm</code>, and <code>EventArchiveFilterForm</code>. The majority of our filterable lists rely on <code>FilterableListForm</code> and the other two are each leveraged by a single page.</p>
 <h4 id="filterablelistform">FilterableListForm<a class="headerlink" href="#filterablelistform" title="Permanent link">¶</a></h4>
-<p>This is the base form that the vast majority of cf.gov uses for filterable lists. It defines the core fields that are visible on the form as well as functions to assist in setting initial data and sanitizing form input. The important information regarding <code>FilterableListForm</code> is that it defines the function <code>get_page_set</code>, which is responsible for invoking a search query. The logic regarding how to pass categories into the search object is due to the previously mentioned <code>CategoryFilterableMixin</code>, which modifies the initial search parameters to enforce a category search if and only if the <code>filterable_categories</code> list is passed into the form when initialized.</p>
+<p>This is the base form that the vast majority of cf.gov uses for filterable lists. It defines the core fields that are visible on the form as well as functions to assist in setting initial data and sanitizing form input. The important information regarding <code>FilterableListForm</code> is that it defines the function <code>get_page_set</code>, which is responsible for invoking a search query.</p>
 <h4 id="enforcementactionsfilterform">EnforcementActionsFilterForm<a class="headerlink" href="#enforcementactionsfilterform" title="Permanent link">¶</a></h4>
 <p>The <code>EnforcementActionsFilterForm</code> is an extension of <code>FilterableListForm</code>, adding on two fields specific to Enforcement Actions, and using a refined search class to provide search functionality against the new fields and a proper ordering by initial filing date.</p>
 <h4 id="eventarchivefilterform">EventArchiveFilterForm<a class="headerlink" href="#eventarchivefilterform" title="Permanent link">¶</a></h4>
@@ -241,14 +241,15 @@
     
   </span>
 </div>
-    <script>var base_url = '..';</script>
-    <script src="../js/theme_extra.js" defer></script>
-    <script src="../js/theme.js" defer></script>
-      <script src="../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>
