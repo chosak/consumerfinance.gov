@@ -118,12 +118,19 @@ RUN ./frontend.sh  ${FRONTEND_TARGET} && \
 
 
 #######################################################################
-# Dev runs with Django runserver with cfgov.settings.local
+# Dev runs with Gunicorn with cfgov.settings.local
 FROM python AS dev
 
 # Django Settings
 ENV DJANGO_SETTINGS_MODULE=cfgov.settings.local
 ENV ALLOWED_HOSTS='["*"]'
+
+# Gunicorn settings for local development
+# These match the defaults in gunicorn.conf.py but are explicit here for clarity
+ENV GUNICORN_WORKERS=1
+ENV GUNICORN_WORKER_CLASS=sync
+ENV GUNICORN_TIMEOUT=0
+ENV GUNICORN_RELOAD=true
 
 # Install dev/local Python requirements
 RUN pip install -r requirements/local.txt
@@ -133,6 +140,7 @@ RUN pip install -r requirements/local.txt
 # these files do not change.
 COPY cfgov ./cfgov/
 COPY static.in ./static.in/
+COPY gunicorn.conf.py ./gunicorn.conf.py
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 COPY --from=node-builder ${APP_HOME} ${APP_HOME}
 
@@ -145,8 +153,8 @@ RUN chown -R ${USERNAME}:${USERNAME} ${APP_HOME}
 # Run the application with the user we created
 USER $USERNAME
 
-# Run Django's runserver
-CMD python ./cfgov/manage.py runserver 0.0.0.0:8000
+# Run Gunicorn with config file
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "cfgov.wsgi:application"]
 
 #######################################################################
 # Production runs with Django via Gunicorn with cfgov.settings.production
@@ -158,9 +166,18 @@ ENV STATIC_PATH=${APP_HOME}/cfgov/static/
 ENV DJANGO_STATIC_ROOT=${STATIC_PATH}
 ENV ALLOWED_HOSTS='["*"]'
 
+# Gunicorn settings for production
+# Override these via Helm chart environment variables based on cluster sizing
+ENV GUNICORN_WORKERS=2
+ENV GUNICORN_WORKER_CLASS=gevent
+ENV GUNICORN_WORKER_CONNECTIONS=30
+ENV GUNICORN_TIMEOUT=30
+ENV GUNICORN_RELOAD=false
+
 # Copy the application code over
 COPY cfgov ./cfgov/
 COPY static.in ./static.in/
+COPY gunicorn.conf.py ./gunicorn.conf.py
 COPY refresh-data.sh .
 COPY dump-data.sh .
 COPY initial-data.sh .
@@ -196,5 +213,5 @@ RUN chown -R ${USERNAME}:${USERNAME} ${APP_HOME}
 # Run the application with the user we created
 USER $USERNAME
 
-# Run Gunicorn
-CMD ["gunicorn", "--reload", "cfgov.wsgi:application", "-b", ":8000"]
+# Run Gunicorn with config file
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "cfgov.wsgi:application"]
